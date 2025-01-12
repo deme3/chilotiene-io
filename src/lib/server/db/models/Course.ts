@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import { ChapterScope } from '$lib/server/models/ChapterScope';
 import { SSDCode } from '$lib/server/models/SSD';
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, type SchemaDefinition } from 'mongoose';
 import type { IProfessor } from './Professor';
+import type { CourseData } from '$lib/server/models/CoursesList';
 
 type FractionalRating = 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5;
 
@@ -15,11 +17,17 @@ export interface IReview {
 	createdAt: Date;
 }
 
-export interface ICourse extends mongoose.Document {
+export interface ICommonCourseData {
 	/**
 	 * The `ordinamento_aa` field of a course, it is usually fixed to "2008".
 	 */
 	ordinamento: '2008' | string;
+
+	/**
+	 * The internal code representation for the course in the university systems,
+	 * usually used for the libretto. Can be found in the field `adCod`.
+	 */
+	librettoCode: string;
 
 	/**
 	 * The internal code representation for the course in the university systems.
@@ -149,28 +157,62 @@ export interface ICourse extends mongoose.Document {
 	 * `modulo_di.adCod == Course.degreeCode`.
 	 */
 	parent?: mongoose.Types.ObjectId;
-	adminHeads: mongoose.Types.ObjectId[];
-	professors: mongoose.Types.ObjectId[];
+	adminHeads?: mongoose.Types.ObjectId[];
+	professors?: mongoose.Types.ObjectId[];
 
-	reviews: IReview[];
+	lookingForParent?: {
+		code: string;
+		librettoCode: string;
+	};
+	createdAt: Date;
+	lastUpdated: Date;
 }
 
-type PopulatedCourse = Omit<ICourse, 'parent' | 'adminHeads' | 'professors' | 'reviews'> & {
+export interface ICourse extends ICommonCourseData {
+	adminHeads: mongoose.Types.ObjectId[];
+	professors: mongoose.Types.ObjectId[];
+	reviews: IReview[];
+	pastVersions: ICourseDoc[];
+}
+
+export interface ICourseDoc extends ICourse, mongoose.Document<mongoose.Types.ObjectId> {}
+export interface ICourseSubDoc
+	extends ICommonCourseData,
+		mongoose.Document<mongoose.Types.ObjectId> {}
+
+export interface ICourseModel
+	extends mongoose.Model<
+		ICourseDoc,
+		{},
+		ICourseMethods,
+		{},
+		mongoose.HydratedDocument<
+			ICourseDoc & {
+				reviews: mongoose.Types.DocumentArray<IReview>;
+				pastVersions: mongoose.Types.DocumentArray<ICourseSubDoc>;
+			},
+			ICourseMethods
+		>
+	> {
+	// Static methods go here
+	importFrom(obj: CourseData): Promise<
+		mongoose.HydratedDocument<
+			ICourseDoc & {
+				reviews: mongoose.Types.DocumentArray<IReview>;
+				pastVersions: mongoose.Types.DocumentArray<ICourseSubDoc>;
+			},
+			ICourseMethods
+		>
+	>;
+}
+
+type PopulatedCourse = Omit<ICourse, 'parent' | 'adminHeads' | 'professors'> & {
 	parent?: ICourse;
 	adminHeads: IProfessor[];
 	professors: IProfessor[];
-	reviews: IReview[];
 };
 
-export interface ICourseModel
-	extends mongoose.Model<ICourse, NonNullable<unknown>, ICourseMethods> {
-	// Static methods go here
-	importFrom(obj: object): ICourse;
-}
-
 export interface ICourseMethods {
-	reviews?: mongoose.Types.DocumentArray<IReview>;
-
 	/**
 	 * Craft the URL for accessing more course information via the University
 	 * website.
@@ -195,80 +237,96 @@ export interface ICourseMethods {
 	populateCourse(): Promise<PopulatedCourse>;
 }
 
-const CourseSchema: Schema = new Schema(
+const commonCourseSchema: SchemaDefinition<ICourseDoc> = {
+	ordinamento: { type: String, required: true },
+	librettoCode: { type: String, required: true },
+	code: { type: String, required: true },
+	degreeTrackCode: { type: String, required: true },
+	degreeCode: { type: String, required: true },
+	coorte: { type: String, required: true },
+	offeringYear: { type: String, required: true },
+	schemaId: { type: String, required: true },
+	departmentCode: { type: String, required: true },
+	credits: { type: Number, required: true },
+	workload: {
+		lectures: { type: Number, required: true },
+		language: { type: Number, required: true },
+		exercises: { type: Number, required: true },
+		lab: { type: Number, required: true },
+		assessment: { type: Number, required: true },
+		finalExam: { type: Number, required: true },
+		internship: { type: Number, required: true },
+		seminar: { type: Number, required: true },
+		other: { type: Number, required: true },
+		unknown: { type: Number, required: true }
+	},
+	ssd: { type: String, enum: Object.values(SSDCode), required: true },
+	name: { type: Map, of: String, required: true },
+	chapters: {
+		...Object.fromEntries(
+			Object.values(ChapterScope).map((scope) => [
+				scope,
+				{
+					type: Map,
+					of: String,
+					required: true,
+					default: () => ({})
+				}
+			])
+		)
+	},
+	parent: { type: Schema.Types.ObjectId, ref: 'Course' },
+	adminHeads: [{ type: Schema.Types.ObjectId, ref: 'Professor' }],
+	professors: [{ type: Schema.Types.ObjectId, ref: 'Professor' }],
+	lookingForParent: {
+		code: { type: String },
+		librettoCode: { type: String }
+	},
+	createdAt: { type: Date, required: true, default: Date.now },
+	lastUpdated: { type: Date, required: true, default: Date.now }
+};
+
+const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 	{
-		ordinamento: { type: String, required: true },
-		code: { type: String, required: true },
-		degreeTrackCode: { type: String, required: true },
-		degreeCode: { type: String, required: true },
-		coorte: { type: String, required: true },
-		offeringYear: { type: String, required: true },
-		schemaId: { type: String, required: true },
-		departmentCode: { type: String, required: true },
-		credits: { type: Number, required: true },
-		workload: {
-			lectures: { type: Number, required: true },
-			language: { type: Number, required: true },
-			exercises: { type: Number, required: true },
-			lab: { type: Number, required: true },
-			assessment: { type: Number, required: true },
-			finalExam: { type: Number, required: true },
-			internship: { type: Number, required: true },
-			seminar: { type: Number, required: true },
-			other: { type: Number, required: true },
-			unknown: { type: Number, required: true }
+		...commonCourseSchema,
+		reviews: {
+			type: [
+				new Schema<IReview>({
+					authorName: { type: String, required: true },
+					text: { type: String, required: true },
+					workload: {
+						type: Number,
+						enum: Array.from({ length: 11 }, (_, i) => i / 2),
+						required: true
+					},
+					difficulty: {
+						type: Number,
+						enum: Array.from({ length: 11 }, (_, i) => i / 2),
+						required: true
+					},
+					imported: { type: Boolean, required: true },
+					createdAt: { type: Date, required: true }
+				})
+			],
+			required: true,
+			default: () => []
 		},
-		ssd: { type: String, enum: Object.values(SSDCode), required: true },
-		name: { type: Map, of: String, required: true },
-		chapters: {
-			...Object.fromEntries(
-				Object.values(ChapterScope).map((scope) => [
-					scope,
-					{
-						type: Map,
-						of: String,
-						required: true,
-						default: {}
-					}
-				])
-			)
-		},
-		parent: { type: Schema.Types.ObjectId, ref: 'Course' },
-		adminHeads: [{ type: Schema.Types.ObjectId, ref: 'Professor' }],
-		professors: [{ type: Schema.Types.ObjectId, ref: 'Professor' }],
-		reviews: [
-			new Schema<IReview>({
-				authorName: { type: String, required: true },
-				text: { type: String, required: true },
-				workload: {
-					type: Number,
-					enum: Array.from({ length: 11 }, (_, i) => i / 2),
-					required: true
-				},
-				difficulty: {
-					type: Number,
-					enum: Array.from({ length: 11 }, (_, i) => i / 2),
-					required: true
-				},
-				imported: { type: Boolean, required: true },
-				createdAt: { type: Date, required: true }
-			})
-		]
+		pastVersions: [{ type: new Schema({ ...commonCourseSchema }) }]
 	},
 	{
 		minimize: false
 	}
 );
 
-CourseSchema.method<ICourse>('getRemoteURL', function (): string {
+CourseSchema.method('getRemoteURL', function (): string {
 	return `https://unitn.coursecatalogue.cineca.it/insegnamenti/${this.offeringYear}/${this.code}/${this.ordinamento}/${this.degreeTrackCode}/${this.degreeCode}?coorte=${this.coorte}&schemaid=${this.schemaId}`;
 });
 
-CourseSchema.method<ICourse>('getDetailsURL', function (): string {
+CourseSchema.method('getDetailsURL', function (): string {
 	return `https://unitn.coursecatalogue.cineca.it/api/v1/insegnamento?anno=${this.offeringYear}&insegnamento=${this.code}&ordinamento_aa=${this.ordinamento}&af_percorso=${this.degreeTrackCode}&corso_cod=${this.degreeCode}&corso_aa=${this.coorte}&schema_id=${this.schemaId}`;
 });
 
-CourseSchema.method<ICourse>('populateCourse', async function (): Promise<PopulatedCourse> {
+CourseSchema.method('populateCourse', async function (): Promise<PopulatedCourse> {
 	return await this.populate<PopulatedCourse>([
 		{ path: 'parent', model: 'Course' },
 		{ path: 'adminHeads', model: 'Professor' },
@@ -276,19 +334,171 @@ CourseSchema.method<ICourse>('populateCourse', async function (): Promise<Popula
 	]);
 });
 
+CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
+	mongoose.HydratedDocument<
+		ICourseDoc & { reviews: mongoose.Types.DocumentArray<IReview> },
+		ICourseMethods
+	>
+> {
+	const existing = await this.findOne({
+		librettoCode: obj.adCod,
+		code: obj.cod,
+		degreeTrackCode: obj.af_percorso_id,
+		degreeCode: obj.corso_cod,
+		coorte: obj.corso_aa,
+		offeringYear: obj.aa,
+		schemaId: obj.schemaId
+	});
+
+	const hasParentToFind = obj.modulo_di && obj.modulo_di.cod && obj.modulo_di.adCod;
+	let foundParent = false;
+	let parent: mongoose.Types.ObjectId | null = null;
+
+	if (hasParentToFind) {
+		const parentCourse = await this.findOne({
+			librettoCode: obj.modulo_di.adCod,
+			code: obj.modulo_di.cod
+		});
+
+		if (parentCourse) {
+			parent = parentCourse._id;
+			foundParent = true;
+		}
+	}
+
+	const baseDocument = {
+		ordinamento: obj.ordinamento_aa.toString(),
+		librettoCode: obj.adCod,
+		code: obj.cod,
+		degreeTrackCode: obj.af_percorso_id,
+		degreeCode: obj.corso_cod,
+		coorte: obj.corso_aa,
+		offeringYear: obj.aa,
+		schemaId: obj.schemaId,
+		departmentCode: obj.dip_cod,
+		credits: obj.crediti,
+		workload: {
+			lectures: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'LEZ')?.valore ?? 0,
+			language: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'CIAL')?.valore ?? 0,
+			exercises: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'ESE')?.valore ?? 0,
+			lab: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'LAB')?.valore ?? 0,
+			assessment: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'PRO')?.valore ?? 0,
+			finalExam: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'PRF')?.valore ?? 0,
+			internship:
+				obj.durata.tipo.find((t) => t.tipo_durata_cod === 'STA' || t.tipo_durata_cod === 'T')
+					?.valore ?? 0,
+			seminar: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'SEM')?.valore ?? 0,
+			other: obj.durata.tipo.find((t) => t.tipo_durata_cod === 'ALT')?.valore ?? 0,
+			unknown: obj.durata.tipo
+				.filter(
+					(t) =>
+						!['LEZ', 'CIAL', 'ESE', 'LAB', 'PRO', 'PRF', 'STA', 'T', 'SEM', 'ALT'].includes(
+							t.tipo_durata_cod
+						)
+				)
+				.reduce((prev, curr) => prev + curr.valore, 0)
+		},
+		ssd: obj.ssd,
+		name: {
+			it: obj.des_it,
+			en: obj.des_en
+		},
+		chapters: {
+			[ChapterScope.Scope]: '',
+			[ChapterScope.ExaminationMethods]: '',
+			[ChapterScope.TeachingMethods]: '',
+			[ChapterScope.TeachingObjectives]: ''
+		},
+		lookingForParent:
+			hasParentToFind && !foundParent
+				? {
+						code: obj.modulo_di.cod,
+						librettoCode: obj.modulo_di.adCod
+					}
+				: undefined
+	};
+
+	const anyoneLookingForMe = await this.find({
+		lookingForParent: {
+			code: obj.cod,
+			librettoCode: obj.adCod
+		}
+	});
+
+	if (existing) {
+		console.log('Exists already. Updating with new data...');
+		const existingPojo = existing.toObject() as ICourse;
+		const minimalPojo = {
+			...existingPojo,
+			parent: undefined,
+			adminHeads: undefined,
+			professors: undefined,
+			reviews: undefined,
+			pastVersions: undefined
+		} as ICommonCourseData;
+
+		existing.lastUpdated = new Date();
+		existing.pastVersions.push(minimalPojo);
+		await existing.save();
+
+		await existing.updateOne({
+			...baseDocument
+		});
+
+		if (anyoneLookingForMe.length > 0) {
+			console.log('Found someone looking for me, updating them...');
+			await Promise.all(
+				anyoneLookingForMe.map((doc) =>
+					doc.updateOne({
+						parent: existing._id,
+						lastUpdated: new Date(),
+						lookingForParent: null
+					})
+				)
+			);
+		}
+
+		return existing;
+	}
+
+	const newDoc = await this.create({
+		...baseDocument,
+		parent: foundParent ? (parent?._id ?? null) : null,
+		adminHeads: [],
+		professors: [],
+		reviews: [],
+		pastVersions: []
+	});
+
+	if (anyoneLookingForMe.length > 0) {
+		console.log('Found someone looking for me, updating them...');
+		await Promise.all(
+			anyoneLookingForMe.map((doc) =>
+				doc.updateOne({
+					parent: newDoc._id,
+					lastUpdated: new Date(),
+					lookingForParent: null
+				})
+			)
+		);
+	}
+
+	return newDoc;
+});
+
 // Create the Session model
 let Course: ICourseModel;
 
 try {
-	Course = mongoose.model<ICourse, ICourseModel>('Course', CourseSchema);
+	Course = mongoose.model<ICourseDoc, ICourseModel>('Course', CourseSchema);
 } catch (e) {
 	if (e instanceof mongoose.Error.OverwriteModelError)
 		if (import.meta.env.MODE === 'development') {
 			console.debug('Reloading model for Course because in development.');
-			Course = mongoose.model<ICourse, ICourseModel>('Course', CourseSchema, undefined, {
+			Course = mongoose.model<ICourseDoc, ICourseModel>('Course', CourseSchema, undefined, {
 				overwriteModels: true
 			});
-		} else Course = mongoose.model<ICourse, ICourseModel>('Course');
+		} else Course = mongoose.model<ICourseDoc, ICourseModel>('Course');
 	else throw e;
 }
 
