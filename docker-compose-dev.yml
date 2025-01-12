@@ -1,0 +1,34 @@
+version: '3'
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: chilotiene
+      MONGO_INITDB_ROOT_PASSWORD: chilotiene
+    expose:
+      - 27017
+    ports:
+      - '27017:27017'
+    volumes:
+      - chilotiene-mongodata:/data/db
+
+  chilotiene:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+      args:
+        - JWT_SECRET_ENV=secret
+        - MONGO_HOST_ENV=mongo
+    ports:
+      - '5173:5173'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    restart: always
+    depends_on:
+      - mongo
+
+volumes:
+  chilotiene-mongodata:
