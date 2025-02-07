@@ -1,7 +1,10 @@
-<script>
+<script lang="ts">
 	import Accordion from '$lib/components/Accordion.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import StarsSelect from '$lib/components/StarsSelect.svelte';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
 
 	let reviewStars = $state(0);
 	let reviewPreview = $state(0);
@@ -12,13 +15,27 @@
 	let focusFromClick = $state(false);
 
 	let allowSubmit = $derived(reviewStars >= 0.5 && workloadShields >= 0.5);
+
+	let rating = $derived(
+		data.course.reviews.length > 0
+			? data.course.reviews.reduce((acc, review) => acc + review.quality, 0) /
+					data.course.reviews.length
+			: 0
+	);
+	let avgWorkload = $derived(
+		data.course.workload.length > 0
+			? data.course.workload.reduce((acc, w) => acc + w, 0) / data.course.workload.length
+			: 0
+	);
 </script>
 
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
 	<div>
 		<h1 class="small-logo font-bold text-zinc-200/50" id="logo">Chi lo tiene...</h1>
-		<h2 class="text-xl font-bold"><strong>Analisi matematica I</strong></h2>
-		<h3 class="text-md text-zinc-500">Brunetti Romeo</h3>
+		<h2 class="text-xl font-bold"><strong>{data.course.name['it']}</strong></h2>
+		<h3 class="text-md text-zinc-500">
+			{data.course.professors[0]?.fullName ?? data.course.adminHeads[0]?.fullName}
+		</h3>
 	</div>
 	<button class="circular-button" aria-label="Go Back" onclick={() => history.back()}>
 		<i class="ti ti-arrow-left"></i>
@@ -77,22 +94,30 @@
 		Integrazione di Riemann su intervalli chiusi e limitati 8. Integrazione di Riemann generalizzata
 		(impropria). 9. Equazioni differenziali ordinarie
 	</Accordion>
-	<Accordion title="Recensioni (2)" noncollapsible>
+	<Accordion title="Recensioni ({data.course.reviews.length})" noncollapsible>
 		{#snippet right()}
-			{#each Array.from({ length: 2 }, (_, i) => i)}
+			{#each Array.from({ length: Math.floor(rating) }, (_, i) => i)}
 				<i class="ti ti-star-filled text-yellow-400"></i>{' '}
 			{/each}
-			<i class="ti ti-star-half-filled text-yellow-400"></i>
-			<i class="ti ti-star text-yellow-400"></i>
-			<i class="ti ti-star text-yellow-400"></i>
-			<span class="ml-1 text-yellow-300/75">2.5</span>
+			{#if rating - Math.floor(rating) >= 0.5}
+				<i class="ti ti-star-half-filled text-yellow-400"></i>{' '}
+			{/if}
+			{#each Array.from({ length: 5 - Math.floor(rating) - (rating - Math.floor(rating) >= 0.5 ? 1 : 0) }, (_, i) => i)}
+				<i class="ti ti-star text-yellow-400"></i>{' '}
+			{/each}
+			<span class="ml-1 text-yellow-300/75">{rating == 0 ? 'ND' : rating}</span>
 			<span class="mx-1"> &bullet; </span>
-			<i class="ti ti-shield-filled text-red-500/75"></i>
-			<i class="ti ti-shield-filled text-red-500/75"></i>
-			<i class="ti ti-shield-filled text-red-500/75"></i>
-			<i class="ti ti-shield-filled text-red-500/75"></i>
-			<i class="ti ti-shield-filled text-red-500/75"></i>
-			<span class="ml-1 text-red-500/75">5</span>
+			{#each Array.from({ length: Math.floor(avgWorkload) }, (_, i) => i)}
+				<i class="ti ti-shield-filled text-red-500/75"></i>{' '}
+			{/each}
+			{#if avgWorkload - Math.floor(avgWorkload) >= 0.5}
+				<i class="ti ti-shield-half-filled inline-block -scale-x-100 scale-y-100 text-red-500/75"
+				></i>{' '}
+			{/if}
+			{#each Array.from({ length: 5 - Math.floor(avgWorkload) - (avgWorkload - Math.floor(avgWorkload) >= 0.5 ? 1 : 0) }, (_, i) => i)}
+				<i class="ti ti-shield text-red-500/75"></i>{' '}
+			{/each}
+			<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload}</span>
 		{/snippet}
 		<form class="flex flex-col" onsubmit={(e) => console.log(e)}>
 			<input
@@ -185,28 +210,15 @@
 			</div>
 		</form>
 		<div class="mt-3 grid gap-3">
-			<ReviewCard
-				author="Mario Rossi"
-				text={`Le lezioni non sono molto utili, sconsiglio la frequenza. Piuttosto, acquistate un
-        buon libro di Analisi I (il testo consigliato va bene) e fate tanti esercizi mentre
-        studiate. Infatti, le lezioni sono un susseguirsi di concetti che arrivano come un
-        treno, ma che non vengono mai applicate durante il semestre, per cui ve le
-        dimenticherete. Il carico è alto e l'esame non perdona: è a crocette, e se non avete
-        compreso l'interezza dell'Analisi matematica non riuscirete a fare abbastanza esercizi
-        da raggiungere il 18. Per raggiungere il 30 invece dovete essere degli déi.`}
-				rating={2.5}
-				workload={5}
-			/>
-			<ReviewCard
-				author="Giuseppe Verdi"
-				text={`Il corso è molto interessante e il professore è molto preparato. Le lezioni sono
-				molto chiare e il materiale è ben organizzato. L'esame è abbastanza difficile, ma
-				fattibile se si studia con costanza. Consiglio di fare tutti gli esercizi proposti
-				durante il corso e di fare molta pratica.`}
-				rating={5}
-				workload={5}
-				sourced={true}
-			/>
+			{#each data.course.reviews as review}
+				<ReviewCard
+					author={review.authorName}
+					text={review.text}
+					rating={review.quality}
+					workload={review.workload}
+					sourced={review.imported}
+				/>
+			{/each}
 		</div>
 	</Accordion>
 </section>

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-import { ChapterScope } from '$lib/server/models/ChapterScope';
+import { ChapterScope } from '$lib/ChapterScope';
 import { SSDCode } from '$lib/server/models/SSD';
-import mongoose, { Schema, type SchemaDefinition } from 'mongoose';
-import type { IProfessor } from './Professor';
+import mongoose, { Schema, type HydratedDocument, type SchemaDefinition } from 'mongoose';
+import { type IProfessor } from './Professor';
+import './Professor';
 import type { CourseData } from '$lib/server/models/CoursesList';
 
 type FractionalRating = 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5;
@@ -12,7 +13,7 @@ export interface IReview {
 	authorName: string;
 	text: string;
 	workload: FractionalRating;
-	difficulty: FractionalRating;
+	quality: FractionalRating;
 	imported: boolean;
 	createdAt: Date;
 }
@@ -138,7 +139,7 @@ export interface ICommonCourseData {
 		 */
 		unknown: number;
 	};
-	ssd: `${SSDCode}`;
+	ssd: `${SSDCode}`[];
 	name: { [key: string]: string };
 	chapters: {
 		[key in `${ChapterScope}`]: {
@@ -206,11 +207,14 @@ export interface ICourseModel
 	>;
 }
 
-type PopulatedCourse = Omit<ICourse, 'parent' | 'adminHeads' | 'professors'> & {
-	parent?: ICourse;
-	adminHeads: IProfessor[];
-	professors: IProfessor[];
-};
+type PopulatedCourse = HydratedDocument<
+	Omit<ICourse, 'parent' | 'adminHeads' | 'professors'> & {
+		parent?: ICourse;
+		adminHeads: IProfessor[];
+		professors: IProfessor[];
+	},
+	ICourseMethods
+>;
 
 export interface ICourseMethods {
 	/**
@@ -234,7 +238,29 @@ export interface ICourseMethods {
 	 * Populate the course with the professors, admin heads, and parent course, if
 	 * available.
 	 */
-	populateCourse(): Promise<PopulatedCourse>;
+	populateCourse(): Promise<HydratedDocument<PopulatedCourse>>;
+
+	/**
+	 * Get the average rating of the course by enumerating all the reviews and
+	 * calculating the average rating.
+	 */
+	getAverageRating(): number;
+
+	/**
+	 * Get the average workload of the course by enumerating all the reviews
+	 * and calculating the average workload.
+	 */
+	getAverageWorkload(): number;
+
+	/**
+	 * Get the numerical ratings of the course for each review.
+	 */
+	getRatings(): number[];
+
+	/**
+	 * Get the numerical workload of the course for each review.
+	 */
+	getWorkloads(): number[];
 }
 
 const commonCourseSchema: SchemaDefinition<ICourseDoc> = {
@@ -260,7 +286,15 @@ const commonCourseSchema: SchemaDefinition<ICourseDoc> = {
 		other: { type: Number, required: true },
 		unknown: { type: Number, required: true }
 	},
-	ssd: { type: String, enum: Object.values(SSDCode), required: true },
+	ssd: {
+		type: [
+			{
+				type: String,
+				enum: Object.values(SSDCode)
+			}
+		],
+		required: true
+	},
 	name: { type: Map, of: String, required: true },
 	chapters: {
 		...Object.fromEntries(
@@ -299,7 +333,7 @@ const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 						enum: Array.from({ length: 11 }, (_, i) => i / 2),
 						required: true
 					},
-					difficulty: {
+					quality: {
 						type: Number,
 						enum: Array.from({ length: 11 }, (_, i) => i / 2),
 						required: true
@@ -334,6 +368,30 @@ CourseSchema.method('populateCourse', async function (): Promise<PopulatedCourse
 	]);
 });
 
+CourseSchema.method('getAverageRating', function (): number {
+	const reviews = this.reviews;
+	if (reviews.length === 0) return 0;
+
+	const qualitySum = reviews.reduce((prev, curr) => prev + curr.quality, 0);
+	return qualitySum / reviews.length;
+});
+
+CourseSchema.method('getAverageWorkload', function (): number {
+	const reviews = this.reviews;
+	if (reviews.length === 0) return 0;
+
+	const workloadSum = reviews.reduce((prev, curr) => prev + curr.workload, 0);
+	return workloadSum / reviews.length;
+});
+
+CourseSchema.method('getRatings', function (): number[] {
+	return this.reviews.map((review) => review.quality);
+});
+
+CourseSchema.method('getWorkloads', function (): number[] {
+	return this.reviews.map((review) => review.workload);
+});
+
 CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 	mongoose.HydratedDocument<
 		ICourseDoc & { reviews: mongoose.Types.DocumentArray<IReview> },
@@ -364,6 +422,21 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 			parent = parentCourse._id;
 			foundParent = true;
 		}
+	}
+
+	if (!('dip_cod' in obj)) {
+		console.log('Warning: Department code not available.');
+		obj.dip_cod = '0';
+	}
+
+	let ssd: string[] = [];
+	if ((typeof obj.ssd === 'string' && obj.ssd === '') || typeof obj.ssd === 'undefined') {
+		console.log('Warning: SSD code not available.');
+		ssd = [SSDCode.XXX0];
+	}
+
+	if (typeof obj.ssd === 'string' && obj.ssd.split(',').length > 1) {
+		ssd = obj.ssd.split(',').map((s) => s.trim());
 	}
 
 	const baseDocument = {
@@ -398,7 +471,7 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 				)
 				.reduce((prev, curr) => prev + curr.valore, 0)
 		},
-		ssd: obj.ssd,
+		ssd,
 		name: {
 			it: obj.des_it,
 			en: obj.des_en

@@ -17,8 +17,12 @@
 		workload: number[];
 		credits: number;
 	} = $props();
-	let rating = $derived(reviews.reduce((acc, review) => acc + review, 0) / reviews.length);
-	let avgWorkload = $derived(workload.reduce((acc, w) => acc + w, 0) / workload.length);
+	let rating = $derived(
+		reviews.length > 0 ? reviews.reduce((acc, review) => acc + review, 0) / reviews.length : 0
+	);
+	let avgWorkload = $derived(
+		workload.length > 0 ? workload.reduce((acc, w) => acc + w, 0) / workload.length : 0
+	);
 	let hovering = $state(false);
 </script>
 
@@ -58,7 +62,7 @@
 				{#each Array.from({ length: 5 - Math.floor(rating) - (rating - Math.floor(rating) >= 0.5 ? 1 : 0) }, (_, i) => i)}
 					<i class="ti ti-star text-yellow-400"></i>{' '}
 				{/each}
-				<span class="ml-1 text-yellow-300/75">{rating}</span>
+				<span class="ml-1 text-yellow-300/75">{rating == 0 ? 'ND' : rating}</span>
 				<span class="mx-1"> &bullet; </span>
 				{#each Array.from({ length: Math.floor(avgWorkload) }, (_, i) => i)}
 					<i class="ti ti-shield-filled text-red-500/75"></i>{' '}
@@ -70,9 +74,7 @@
 				{#each Array.from({ length: 5 - Math.floor(avgWorkload) - (avgWorkload - Math.floor(avgWorkload) >= 0.5 ? 1 : 0) }, (_, i) => i)}
 					<i class="ti ti-shield text-red-500/75"></i>{' '}
 				{/each}
-				<span class="ml-1 text-red-500/75"
-					>{workload.reduce((acc, w) => acc + w, 0) / workload.length}</span
-				>
+				<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload}</span>
 			</div>
 		</div>
 		<div class="min-w-12 max-w-12 text-center">

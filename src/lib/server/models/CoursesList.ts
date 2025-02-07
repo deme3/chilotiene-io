@@ -135,7 +135,7 @@ export interface CourseData {
 	tipo_corso_cod: string;
 	tipo_corso_des_it: string;
 	tipo_corso_des_en: string;
-	dip_cod: string;
+	dip_cod?: string;
 	dip_des_it: string;
 	dip_des_en: unknown;
 	corso_percorso_des_it: string;

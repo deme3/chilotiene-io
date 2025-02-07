@@ -370,7 +370,8 @@ export enum SSDCode {
 	VET_08 = 'VET/08',
 	VET_09 = 'VET/09',
 	VET_10 = 'VET/10',
-	XXX0 = 'XXX0'
+	XXX0 = 'XXX0',
+	NN = 'NN'
 }
 
 export const SSDDescriptions: { [key in SSDCode]: string } = {
@@ -748,5 +749,6 @@ export const SSDDescriptions: { [key in SSDCode]: string } = {
 	[SSDCode.VET_08]: 'VET/08 CLINICA MEDICA VETERINARIA',
 	[SSDCode.VET_09]: 'VET/09 CLINICA CHIRURGICA VETERINARIA',
 	[SSDCode.VET_10]: 'VET/10 CLINICA OSTETRICA E GINECOLOGIA VETERINARIA',
-	[SSDCode.XXX0]: 'Non definito'
+	[SSDCode.XXX0]: 'Non definito',
+	[SSDCode.NN]: 'Non definito'
 };

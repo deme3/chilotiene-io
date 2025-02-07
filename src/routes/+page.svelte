@@ -1,6 +1,11 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
 	import CourseCard from '$lib/components/CourseCard.svelte';
+	import { ChapterScope } from '$lib/ChapterScope';
+	import type { PageProps } from './$types';
+	import CourseCardSkeleton from '$lib/components/CourseCardSkeleton.svelte';
+
+	let { data }: PageProps = $props();
 </script>
 
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
@@ -32,41 +37,23 @@
 
 <section class="mt-4">
 	<div class="grid gap-4 lg:grid-cols-2">
-		<CourseCard
-			id="1"
-			name="Analisi matematica I"
-			description="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Incidunt, eos id. Sint placeat culpa velit laboriosam..."
-			reviews={[1, 2, 3, 2, 1]}
-			workload={[5, 5, 5, 5, 4]}
-			credits={12}
-		/>
-		<CourseCard
-			name="Algoritmi e Strutture Dati"
-			description="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Incidunt, eos id. Sint placeat culpa velit laboriosam..."
-			reviews={[5, 5, 5, 5, 4]}
-			workload={[5, 3, 3, 2, 4]}
-			credits={12}
-		/>
-		<CourseCard
-			name="Fisica I"
-			description="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Incidunt, eos id. Sint placeat culpa velit laboriosam..."
-			reviews={[3, 4, 3, 4, 3]}
-			workload={[5, 5, 5, 5, 5]}
-			credits={6}
-		/>
-		<CourseCard
-			name="Inglese B1"
-			description="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Incidunt, eos id. Sint placeat culpa velit laboriosam..."
-			reviews={[5, 5, 5, 5, 5]}
-			workload={[0, 1, 1, 0, 0]}
-			credits={3}
-		/>
-		<CourseCard
-			name="Programmazione I"
-			description="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Incidunt, eos id. Sint placeat culpa velit laboriosam..."
-			reviews={[4, 4, 2, 4, 4]}
-			workload={[5, 4, 2, 3, 5]}
-			credits={12}
-		/>
+		{#await data.courses}
+			{#each Array.from({ length: 6 }, (_, i) => i) as _}
+				<CourseCardSkeleton />
+			{/each}
+		{:then courses}
+			{#each courses as course}
+				<CourseCard
+					id={course.id}
+					name={course.name['it']}
+					description={course.chapters[ChapterScope.TeachingObjectives].it}
+					reviews={course.reviews}
+					workload={course.workload}
+					credits={course.credits}
+				/>
+			{/each}
+		{:catch error}
+			<p>{error.message}</p>
+		{/await}
 	</div>
 </section>
