@@ -6,6 +6,14 @@
 	import CourseCardSkeleton from '$lib/components/CourseCardSkeleton.svelte';
 
 	let { data }: PageProps = $props();
+
+	let searchTimer: ReturnType<typeof setTimeout>;
+	let searchForm: HTMLFormElement;
+
+	function onSearchTermChange() {
+		if (searchTimer) clearTimeout(searchTimer);
+		searchTimer = setTimeout(() => searchForm.requestSubmit(), 500);
+	}
 </script>
 
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
@@ -33,7 +41,16 @@
 	</div>
 </div>
 
-<input type="text" class="text-input mt-4" placeholder="Cerca un corso..." />
+<form data-sveltekit-keepfocus bind:this={searchForm}>
+	<input
+		name="q"
+		type="text"
+		class="text-input mt-4"
+		placeholder="Cerca un corso..."
+		value={data.searchTerm}
+		oninput={onSearchTermChange}
+	/>
+</form>
 
 <section class="mt-4">
 	<div class="grid gap-4 lg:grid-cols-2">
