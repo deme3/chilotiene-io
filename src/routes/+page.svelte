@@ -67,6 +67,7 @@
 					description={course.chapters[ChapterScope.TeachingObjectives].it}
 					reviews={course.reviews}
 					workload={course.workload}
+					grades={course.grades}
 					credits={course.credits}
 					professors={course.professors.map((x) => x.fullName)}
 					adminHeads={course.adminHeads.map((x) => x.fullName)}

@@ -46,6 +46,14 @@
 			? data.course.workload.reduce((acc, w) => acc + w, 0) / data.course.workload.length
 			: 0
 	);
+	let avgGrade = $derived(
+		data.course.reviews.length > 0
+			? data.course.reviews
+					.filter((review) => !!review.grade)
+					.reduce((acc, review) => acc + review.grade!, 0) /
+					data.course.reviews.filter((review) => !!review.grade).length
+			: 0
+	);
 </script>
 
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
@@ -163,6 +171,13 @@
 				<i class="ti ti-shield text-red-500/75"></i>{' '}
 			{/each}
 			<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload.toFixed(1)}</span>
+			<span class="mx-1"> &bullet; </span>
+			{#if avgGrade > 0}
+				<i class="ti ti-medal text-green-500/75"></i>{' '}
+				<span class="ml-1 text-green-500/75">Media: {avgGrade.toFixed(1)}</span>
+			{:else}
+				<span class="text-orange-300/75">ND</span>
+			{/if}
 		{/snippet}
 		<form
 			method="POST"
@@ -175,12 +190,22 @@
 				};
 			}}
 		>
-			<input
-				name="author"
-				type="text"
-				class="text-input w-full rounded-b-none bg-zinc-900 focus:z-10"
-				placeholder="Nome (opzionale)"
-			/>
+			<div class="flex flex-col lg:flex-row">
+				<input
+					name="author"
+					type="text"
+					class="text-input w-full rounded-b-none border-b-zinc-800 border-r-zinc-800 bg-zinc-900 focus:z-10 max-lg:border-b max-lg:border-r-0 lg:rounded-tr-none lg:border-r"
+					placeholder="Nome (opzionale)"
+				/>
+				<input
+					name="grade"
+					type="number"
+					class="text-input w-full bg-zinc-900 focus:z-10 max-lg:rounded-none lg:w-1/4 lg:rounded-b-none lg:rounded-tl-none"
+					placeholder="Voto (opz., lode: 31)"
+					min="18"
+					max="31"
+				/>
+			</div>
 			<input name="quality" type="hidden" value={reviewStars} />
 			<input name="workload" type="hidden" value={workloadShields} />
 
@@ -222,6 +247,7 @@
 					class="text-input block w-full resize-none rounded-none bg-zinc-900 !ring-0"
 					placeholder="Scrivi una recensione..."
 					rows="3"
+					required
 					onkeydown={(e) => {
 						if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
 							e.currentTarget?.form?.requestSubmit();
@@ -278,6 +304,7 @@
 					date={review.createdAt}
 					rating={review.quality}
 					workload={review.workload}
+					grade={review.grade}
 					sourced={review.imported}
 				/>
 			{/each}

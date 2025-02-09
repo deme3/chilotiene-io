@@ -10,6 +10,7 @@
 		reviews,
 		workload,
 		credits,
+		grades,
 		adminHeads,
 		professors
 	}: {
@@ -19,6 +20,7 @@
 		description: string;
 		reviews: number[];
 		workload: number[];
+		grades: number[];
 		credits: number;
 		adminHeads: string[];
 		professors: string[];
@@ -28,6 +30,9 @@
 	);
 	let avgWorkload = $derived(
 		workload.length > 0 ? workload.reduce((acc, w) => acc + w, 0) / workload.length : 0
+	);
+	let avgGrade = $derived(
+		grades.length > 0 ? grades.reduce((acc, g) => acc + g, 0) / grades.length : 0
 	);
 	let hovering = $state(false);
 
@@ -109,6 +114,13 @@
 					<i class="ti ti-shield text-red-500/75"></i>{' '}
 				{/each}
 				<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload.toFixed(1)}</span>
+				<span class="mx-1"> &bullet; </span>
+				<i class="ti ti-medal text-green-500/75"></i>{' '}
+				{#if avgGrade > 0}
+					<span class="ml-1 text-green-500/75">{avgGrade.toFixed(1)}</span>
+				{:else}
+					<span class="text-green-500/75">ND</span>
+				{/if}
 			</div>
 		</div>
 		<div class="min-w-12 max-w-12 text-center">

@@ -1,4 +1,4 @@
-import Course from '$lib/server/db/models/Course';
+import Course, { type IReview } from '$lib/server/db/models/Course';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -53,6 +53,15 @@ export const actions = {
 			author = formData.get('author') as string;
 		}
 
+		let grade;
+		if (formData.has('grade')) {
+			grade = parseInt(formData.get('grade') as string);
+
+			if (grade < 18 || grade > 31) {
+				return error(400, 'Grade must be between 18 and 31');
+			}
+		}
+
 		const review = formData.get('review') as string;
 		const imported = formData.get('imported') === 'on';
 		const quality = parseFloat(formData.get('quality') as string);
@@ -82,8 +91,9 @@ export const actions = {
 			text: review,
 			imported,
 			quality,
-			workload
-		});
+			workload,
+			grade
+		} as IReview);
 		await course.save();
 	}
 };

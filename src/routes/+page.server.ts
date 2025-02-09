@@ -139,7 +139,8 @@ export const load: PageServerLoad = async ({ url }) => {
 					...course.toObject({ flattenMaps: true, flattenObjectIds: true }),
 					id: course.id,
 					reviews: course.getRatings(),
-					workload: course.getWorkloads()
+					workload: course.getWorkloads(),
+					grades: course.getGrades()
 				}))
 			),
 		currentPage: pageNumber,

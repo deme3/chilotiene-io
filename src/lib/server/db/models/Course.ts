@@ -7,6 +7,7 @@ import './Professor';
 import type { CourseData } from '$lib/server/models/CoursesList';
 
 type FractionalRating = 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5;
+type Grade = 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 30 | 31;
 
 export interface IReview {
 	_id: mongoose.Types.ObjectId;
@@ -14,6 +15,7 @@ export interface IReview {
 	text: string;
 	workload: FractionalRating;
 	quality: FractionalRating;
+	grade?: Grade;
 	imported: boolean;
 	createdAt: Date;
 }
@@ -261,6 +263,11 @@ export interface ICourseMethods {
 	 * Get the numerical workload of the course for each review.
 	 */
 	getWorkloads(): number[];
+
+	/**
+	 * Get the grades of the course for each review, if available.
+	 */
+	getGrades(): number[];
 }
 
 const commonCourseSchema: SchemaDefinition<ICourseDoc> = {
@@ -338,6 +345,11 @@ const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 						enum: Array.from({ length: 11 }, (_, i) => i / 2),
 						required: true
 					},
+					grade: {
+						type: Number,
+						enum: Array.from({ length: 14 }, (_, i) => i + 18),
+						required: false
+					},
 					imported: { type: Boolean, required: true },
 					createdAt: { type: Date, required: true, default: Date.now }
 				})
@@ -390,6 +402,10 @@ CourseSchema.method('getRatings', function (): number[] {
 
 CourseSchema.method('getWorkloads', function (): number[] {
 	return this.reviews.map((review) => review.workload);
+});
+
+CourseSchema.method('getGrades', function (): number[] {
+	return this.reviews.filter((review) => !!review.grade).map((review) => review.grade!);
 });
 
 CourseSchema.static('importFrom', async function (obj: CourseData): Promise<

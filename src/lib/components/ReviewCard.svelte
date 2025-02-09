@@ -7,6 +7,7 @@
 		date,
 		rating,
 		workload,
+		grade,
 		sourced
 	}: {
 		author?: string;
@@ -14,6 +15,7 @@
 		date: Date;
 		rating: number;
 		workload: number;
+		grade?: number;
 		sourced?: boolean;
 	} = $props();
 </script>
@@ -59,6 +61,11 @@
 					<i class="ti ti-shield text-red-500/75"></i>{' '}
 				{/each}
 				<span class="ml-1 text-red-500/75">{workload}</span>
+				{#if grade}
+					<span class="mx-1"> &bullet; </span>
+					<i class="ti ti-medal text-green-500/75"></i>{' '}
+					<span class="text-green-500/75">{grade == 31 ? '30L' : grade}</span>
+				{/if}
 				{#if sourced}
 					<span class="mx-1"> &bullet; </span>
 					<i class="ti ti-world text-blue-500/50"></i>
