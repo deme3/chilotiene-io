@@ -30,7 +30,6 @@ export const load: PageServerLoad = async ({ url }) => {
 		{
 			$match: {
 				$and: [
-					{ coorte: '2024' },
 					{
 						$or: [
 							{
