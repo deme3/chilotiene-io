@@ -81,7 +81,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="First page"
-				href="?page=1"
+				href="?page=1&q={data.searchTerm}"
 				class:disabled={data.currentPage === 1}
 				aria-disabled={data.currentPage === 1}
 				data-sveltekit-noscroll><i class="ti ti-chevrons-left"></i></a
@@ -89,7 +89,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="Previous page"
-				href="?page={Math.max(1, data.currentPage - 1)}"
+				href="?page={Math.max(1, data.currentPage - 1)}&q={data.searchTerm}"
 				class:disabled={data.currentPage === 1}
 				aria-disabled={data.currentPage === 1}
 				data-sveltekit-noscroll><i class="ti ti-chevron-left"></i></a
@@ -97,7 +97,7 @@
 			{#each Array.from({ length: pages }, (_, i) => i + 1).filter((i) => i >= data.currentPage - 3 && i <= data.currentPage + 5) as i}
 				<a
 					class="generic-button zinc square"
-					href="?page={i}"
+					href="?page={i}&q={data.searchTerm}"
 					data-sveltekit-noscroll
 					class:disabled={i === data.currentPage}
 					aria-disabled={i === data.currentPage}>{i}</a
@@ -106,7 +106,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="Next page"
-				href="?page={Math.min(pages, data.currentPage + 1)}"
+				href="?page={Math.min(pages, data.currentPage + 1)}&q={data.searchTerm}"
 				class:disabled={data.currentPage === pages}
 				aria-disabled={data.currentPage === pages}
 				data-sveltekit-noscroll><i class="ti ti-chevron-right"></i></a
@@ -114,7 +114,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="Last Page"
-				href="?page={pages}"
+				href="?page={pages}&q={data.searchTerm}"
 				class:disabled={data.currentPage === pages}
 				aria-disabled={data.currentPage === pages}
 				data-sveltekit-noscroll><i class="ti ti-chevrons-right"></i></a
