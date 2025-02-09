@@ -172,11 +172,11 @@
 			{/each}
 			<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload.toFixed(1)}</span>
 			<span class="mx-1"> &bullet; </span>
+			<i class="ti ti-medal text-green-500/75"></i>{' '}
 			{#if avgGrade > 0}
-				<i class="ti ti-medal text-green-500/75"></i>{' '}
 				<span class="ml-1 text-green-500/75">Media: {avgGrade.toFixed(1)}</span>
 			{:else}
-				<span class="text-orange-300/75">ND</span>
+				<span class="text-green-500/75">ND</span>
 			{/if}
 		{/snippet}
 		<form
