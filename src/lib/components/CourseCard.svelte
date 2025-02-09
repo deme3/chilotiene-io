@@ -4,6 +4,7 @@
 
 	let {
 		id,
+		code,
 		name,
 		description,
 		reviews,
@@ -13,6 +14,7 @@
 		professors
 	}: {
 		id?: string;
+		code: string;
 		name: string;
 		description: string;
 		reviews: number[];
@@ -59,6 +61,7 @@
 >
 	<div class="flex cursor-pointer items-center justify-between gap-8">
 		<div>
+			<div class="font-mono text-xs text-zinc-300/75">{code}</div>
 			<h3 class="text-xl font-bold">
 				{name}
 				<span class="text-xs text-zinc-300/75">{credits} CFU</span>

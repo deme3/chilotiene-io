@@ -62,6 +62,7 @@
 			{#each courses as course}
 				<CourseCard
 					id={course.id}
+					code={course.librettoCode}
 					name={course.name['it']}
 					description={course.chapters[ChapterScope.TeachingObjectives].it}
 					reviews={course.reviews}
