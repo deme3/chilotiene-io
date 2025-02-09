@@ -45,5 +45,17 @@
 
 	.generic-button {
 		@apply bg-unitn rounded-md px-6 py-2 text-white disabled:opacity-50;
+
+		&.zinc {
+			@apply bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 shadow-md;
+		}
+
+		&.disabled {
+			@apply cursor-not-allowed opacity-50;
+		}
+
+		&.square {
+			@apply px-4;
+		}
 	}
 }

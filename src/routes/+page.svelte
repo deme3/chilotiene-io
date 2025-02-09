@@ -73,4 +73,49 @@
 			<p>{error.message}</p>
 		{/await}
 	</div>
+	<div class="mt-4 flex items-center justify-center gap-2">
+		{#await data.pages then pages}
+			<a
+				class="generic-button zinc square"
+				aria-label="First page"
+				href="?page=1"
+				class:disabled={data.currentPage === 1}
+				aria-disabled={data.currentPage === 1}
+				data-sveltekit-noscroll><i class="ti ti-chevrons-left"></i></a
+			>
+			<a
+				class="generic-button zinc square"
+				aria-label="Previous page"
+				href="?page={Math.max(1, data.currentPage - 1)}"
+				class:disabled={data.currentPage === 1}
+				aria-disabled={data.currentPage === 1}
+				data-sveltekit-noscroll><i class="ti ti-chevron-left"></i></a
+			>
+			{#each Array.from({ length: pages }, (_, i) => i + 1).filter((i) => i >= data.currentPage - 3 && i <= data.currentPage + 5) as i}
+				<a
+					class="generic-button zinc square"
+					href="?page={i}"
+					data-sveltekit-noscroll
+					class:disabled={i === data.currentPage}
+					aria-disabled={i === data.currentPage}>{i}</a
+				>
+			{/each}
+			<a
+				class="generic-button zinc square"
+				aria-label="Next page"
+				href="?page={Math.min(pages, data.currentPage + 1)}"
+				class:disabled={data.currentPage === pages}
+				aria-disabled={data.currentPage === pages}
+				data-sveltekit-noscroll><i class="ti ti-chevron-right"></i></a
+			>
+			<a
+				class="generic-button zinc square"
+				aria-label="Last Page"
+				href="?page={pages}"
+				class:disabled={data.currentPage === pages}
+				aria-disabled={data.currentPage === pages}
+				data-sveltekit-noscroll><i class="ti ti-chevrons-right"></i></a
+			>
+		{/await}
+	</div>
 </section>
