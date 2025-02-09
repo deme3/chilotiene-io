@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import CourseCard from '$lib/components/CourseCard.svelte';
 	import { ChapterScope } from '$lib/ChapterScope';
 	import type { PageProps } from './$types';
 	import CourseCardSkeleton from '$lib/components/CourseCardSkeleton.svelte';
+	import { UserRole } from '$lib/UserRole';
+	import { enhance } from '$app/forms';
 
 	let { data }: PageProps = $props();
 
@@ -22,7 +25,7 @@
 		<h2 class="text-sm">Seleziona un corso per visualizzarne informazioni e recensioni.</h2>
 	</div>
 	<div class="flex gap-4">
-		{#if true}
+		{#if data.user && data.user.role === UserRole.Admin}
 			<button
 				class="circular-button bg-orange-700 hover:bg-orange-600 active:bg-orange-800"
 				aria-label="Admin functions"
@@ -30,6 +33,27 @@
 			>
 				<i class="ti ti-tools"></i>
 			</button>
+		{/if}
+		{#if !data.user}
+			<button class="circular-button" aria-label="Accedi" onclick={() => goto(`${base}/login`)}>
+				<i class="ti ti-key"></i>
+			</button>
+		{:else}
+			<div class="flex">
+				<button
+					class="circular-button flex items-center gap-2 rounded-r-none border-r border-r-zinc-900"
+					aria-label="Profilo"
+					onclick={() => goto(`${base}/profile`)}
+				>
+					<i class="ti ti-user"></i>
+					<span class="text-xs">{data.user.fullName}</span>
+				</button>
+				<form method="POST" action="{base}/logout" use:enhance>
+					<button class="circular-button rounded-l-none" aria-label="Logout">
+						<i class="ti ti-door-exit"></i>
+					</button>
+				</form>
+			</div>
 		{/if}
 		<button
 			class="circular-button"

@@ -3,6 +3,7 @@
 	import Accordion from '$lib/components/Accordion.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import StarsSelect from '$lib/components/StarsSelect.svelte';
+	import { UserRole } from '$lib/UserRole';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -277,7 +278,7 @@
 						<div class="font-semibold text-red-500/75">{workloadPreview}</div>
 					</div>
 					<div class="flex flex-col items-stretch gap-2 self-stretch md:flex-row md:items-center">
-						{#if true}
+						{#if data.user && data.user.role === UserRole.Admin}
 							<label
 								class="pointer-events-auto flex items-center gap-2 self-center text-sm text-orange-600 md:self-auto"
 							>

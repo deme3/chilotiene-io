@@ -18,8 +18,9 @@
 <div class="text-md rounded-lg bg-zinc-800 shadow-lg">
 	<div
 		class="flex cursor-pointer items-center justify-between gap-8 border-b border-zinc-700 px-4 py-3"
-		class:border-b-0={!open && !noncollapsible}
+		class:border-b-0={(!open && !noncollapsible) || title.trim() === ''}
 		class:!cursor-auto={noncollapsible}
+		class:!p-0={title.trim() === ''}
 		onclick={(e) => {
 			if (noncollapsible) return;
 			open = !open;

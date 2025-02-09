@@ -26,15 +26,16 @@
 
 <main class="preload">
 	{@render children()}
-	<p class="mt-4 text-center text-zinc-500/50">
-		Brought to you with &hearts; by <a href="https://deme3.me" class="underline underline-offset-2"
-			>Demetrio</a
-		>
-	</p>
-	<p class="text-center text-zinc-500/50">
-		<a href="/info" class="underline underline-offset-2">About</a> &middot;
-		<a href="/feedback" class="underline underline-offset-2">Feedback</a>
-	</p>
+	<footer class="[&_a:hover]:no-underline [&_a]:underline [&_a]:underline-offset-4">
+		<p class="mt-4 text-center text-zinc-500/50">
+			Brought to you with &hearts; by <a href="https://deme3.me">Demetrio</a>
+		</p>
+		<p class="text-center text-zinc-500/50">
+			<a href="/info">About</a> &middot;
+			<a href="/feedback">Feedback</a> &middot;
+			<a href="/privacy">Privacy</a>
+		</p>
+	</footer>
 </main>
 
 <style>
