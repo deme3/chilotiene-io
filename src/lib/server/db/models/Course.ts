@@ -10,7 +10,7 @@ type FractionalRating = 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5;
 
 export interface IReview {
 	_id: mongoose.Types.ObjectId;
-	authorName: string;
+	authorName?: string;
 	text: string;
 	workload: FractionalRating;
 	quality: FractionalRating;
@@ -326,7 +326,7 @@ const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 		reviews: {
 			type: [
 				new Schema<IReview>({
-					authorName: { type: String, required: true },
+					authorName: { type: String, required: false },
 					text: { type: String, required: true },
 					workload: {
 						type: Number,
@@ -339,7 +339,7 @@ const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 						required: true
 					},
 					imported: { type: Boolean, required: true },
-					createdAt: { type: Date, required: true }
+					createdAt: { type: Date, required: true, default: Date.now }
 				})
 			],
 			required: true,

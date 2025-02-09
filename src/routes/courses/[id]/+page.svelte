@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import Accordion from '$lib/components/Accordion.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import StarsSelect from '$lib/components/StarsSelect.svelte';
@@ -163,12 +164,25 @@
 			{/each}
 			<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload.toFixed(1)}</span>
 		{/snippet}
-		<form class="flex flex-col" onsubmit={(e) => console.log(e)}>
+		<form
+			method="POST"
+			class="flex flex-col"
+			use:enhance={() => {
+				return async ({ result, update }) => {
+					await update();
+					reviewStars = 0;
+					workloadShields = 0;
+				};
+			}}
+		>
 			<input
+				name="author"
 				type="text"
 				class="text-input w-full rounded-b-none bg-zinc-900 focus:z-10"
 				placeholder="Nome (opzionale)"
 			/>
+			<input name="quality" type="hidden" value={reviewStars} />
+			<input name="workload" type="hidden" value={workloadShields} />
 
 			<div
 				class="cursor-text rounded-b-md border-t border-zinc-800 ring-unitn/55 has-[textarea:focus]:ring-2"
@@ -204,6 +218,7 @@
 				tabindex="0"
 			>
 				<textarea
+					name="review"
 					class="text-input block w-full resize-none rounded-none bg-zinc-900 !ring-0"
 					placeholder="Scrivi una recensione..."
 					rows="3"
@@ -260,6 +275,7 @@
 				<ReviewCard
 					author={review.authorName}
 					text={review.text}
+					date={review.createdAt}
 					rating={review.quality}
 					workload={review.workload}
 					sourced={review.imported}
