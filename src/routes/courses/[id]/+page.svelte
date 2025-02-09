@@ -220,7 +220,7 @@
 					}}
 				></textarea>
 				<div
-					class="pointer-events-none flex items-center justify-between rounded-b-md bg-zinc-900 p-2"
+					class="pointer-events-none flex flex-col items-center justify-between rounded-b-md bg-zinc-900 p-2 md:flex-row"
 				>
 					<div class="pointer-events-auto flex cursor-default items-center gap-2 px-2">
 						<StarsSelect bind:fixedValue={reviewStars} bind:safeValue={reviewPreview} />
@@ -235,9 +235,11 @@
 						/>
 						<div class="font-semibold text-red-500/75">{workloadPreview}</div>
 					</div>
-					<div class="flex items-center gap-2">
+					<div class="flex flex-col items-stretch gap-2 self-stretch md:flex-row md:items-center">
 						{#if true}
-							<label class="pointer-events-auto flex items-center gap-2 text-sm text-orange-600">
+							<label
+								class="pointer-events-auto flex items-center gap-2 self-center text-sm text-orange-600 md:self-auto"
+							>
 								<input type="checkbox" class="form-checkbox" name="imported" />
 								<span>
 									Importata dal web (<i class="ti ti-tools"></i>)
