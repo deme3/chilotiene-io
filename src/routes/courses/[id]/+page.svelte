@@ -149,7 +149,7 @@
 			{#each Array.from({ length: 5 - Math.floor(rating) - (rating - Math.floor(rating) >= 0.5 ? 1 : 0) }, (_, i) => i)}
 				<i class="ti ti-star text-yellow-400"></i>{' '}
 			{/each}
-			<span class="ml-1 text-yellow-300/75">{rating == 0 ? 'ND' : rating}</span>
+			<span class="ml-1 text-yellow-300/75">{rating == 0 ? 'ND' : rating.toFixed(1)}</span>
 			<span class="mx-1"> &bullet; </span>
 			{#each Array.from({ length: Math.floor(avgWorkload) }, (_, i) => i)}
 				<i class="ti ti-shield-filled text-red-500/75"></i>{' '}
@@ -161,7 +161,7 @@
 			{#each Array.from({ length: 5 - Math.floor(avgWorkload) - (avgWorkload - Math.floor(avgWorkload) >= 0.5 ? 1 : 0) }, (_, i) => i)}
 				<i class="ti ti-shield text-red-500/75"></i>{' '}
 			{/each}
-			<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload}</span>
+			<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload.toFixed(1)}</span>
 		{/snippet}
 		<form class="flex flex-col" onsubmit={(e) => console.log(e)}>
 			<input
