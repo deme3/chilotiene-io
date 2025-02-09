@@ -6,6 +6,24 @@
 
 	let { data }: PageProps = $props();
 
+	let bothProfessorAndHead = $derived(
+		data.course.professors.filter((professor) =>
+			data.course.adminHeads.map((adminHead) => adminHead.fullName).includes(professor.fullName)
+		)
+	);
+	let uniqueProfessors = $derived(
+		data.course.professors.filter(
+			(professor, i) =>
+				!data.course.adminHeads.map((adminHead) => adminHead.fullName).includes(professor.fullName)
+		)
+	);
+	let uniqueAdminHeads = $derived(
+		data.course.adminHeads.filter(
+			(adminHead, i) =>
+				!data.course.professors.map((professor) => professor.fullName).includes(adminHead.fullName)
+		)
+	);
+
 	let reviewStars = $state(0);
 	let reviewPreview = $state(0);
 
@@ -34,7 +52,33 @@
 		<h1 class="small-logo font-bold text-zinc-200/50" id="logo">Chi lo tiene...</h1>
 		<h2 class="text-xl font-bold"><strong>{data.course.name['it']}</strong></h2>
 		<h3 class="text-md text-zinc-500">
-			{data.course.professors[0]?.fullName ?? data.course.adminHeads[0]?.fullName}
+			{#each bothProfessorAndHead as professor, i}
+				<i class="ti ti-user" title="Docente e titolare"
+				></i>{' '}{professor.fullName}{#if i < bothProfessorAndHead.length - 1},{' '}
+				{/if}
+			{/each}{#if bothProfessorAndHead.length > 0 && (uniqueProfessors.length > 0 || uniqueAdminHeads.length > 0)}
+				,{' '}
+			{/if}
+			{#each uniqueProfessors as professor, i}
+				<i class="ti ti-school" title="Docente"
+				></i>{' '}{professor.fullName}{#if i < uniqueProfessors.length - 1},{' '}
+				{/if}
+			{/each}{#if uniqueProfessors.length > 0 && uniqueAdminHeads.length > 0}
+				,{' '}
+			{/if}
+			{#each uniqueAdminHeads as adminHead, i}
+				<i class="ti ti-sitemap" title="Titolare"
+				></i>{' '}{adminHead.fullName}{#if i < uniqueAdminHeads.length - 1},{' '}
+				{/if}
+			{/each}
+			{#if bothProfessorAndHead.length == 0 && uniqueProfessors.length == 0 && uniqueAdminHeads.length == 0}
+				<span
+					class="cursor-help underline decoration-dotted"
+					title="Non risulta un titolare per questo corso"
+					><i class="ti ti-user-question"></i> Nessuno?</span
+				>
+			{/if}
+			<!-- {data.course.professors[0]?.fullName ?? data.course.adminHeads[0]?.fullName} -->
 		</h3>
 	</div>
 	<button class="circular-button" aria-label="Go Back" onclick={() => history.back()}>
