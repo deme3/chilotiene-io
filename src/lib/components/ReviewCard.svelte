@@ -1,13 +1,17 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+
 	const {
 		author,
 		text,
+		date,
 		rating,
 		workload,
 		sourced
 	}: {
-		author: string;
+		author?: string;
 		text: string;
+		date: Date;
 		rating: number;
 		workload: number;
 		sourced?: boolean;
@@ -17,7 +21,18 @@
 <div class="rounded-lg bg-zinc-900 p-4 shadow-lg">
 	<div class="flex items-center justify-between gap-4">
 		<div>
-			<h3 class="text-md font-bold">{author}</h3>
+			{#if author}
+				<h3 class="text-md font-bold">{author}</h3>
+			{/if}
+			<p class="text-xs text-zinc-300/50">
+				{date.toLocaleDateString(browser ? navigator.language : 'it-IT', {
+					year: 'numeric',
+					month: 'long',
+					day: 'numeric',
+					hour: 'numeric',
+					minute: '2-digit'
+				})}
+			</p>
 			<p class="text-sm text-zinc-300/75">
 				{text}
 			</p>
