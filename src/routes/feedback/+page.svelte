@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import Accordion from '$lib/components/Accordion.svelte';
 	import Select from '$lib/components/Select.svelte';
 </script>
@@ -8,9 +10,14 @@
 		<h1 class="small-logo font-bold text-zinc-200/50" id="logo">Chi lo tiene...</h1>
 		<h2 class="text-xl font-bold"><strong>Feedback Form</strong></h2>
 	</div>
-	<button class="circular-button" aria-label="Go Back" onclick={() => history.back()}>
-		<i class="ti ti-arrow-left"></i>
-	</button>
+	<div class="flex items-center justify-end gap-4">
+		<button class="circular-button" aria-label="Go Home" onclick={() => goto(`${base}/`)}>
+			<i class="ti ti-home"></i>
+		</button>
+		<button class="circular-button" aria-label="Go Back" onclick={() => history.back()}>
+			<i class="ti ti-arrow-left"></i>
+		</button>
+	</div>
 </div>
 
 <section class="mt-4 flex flex-col gap-4">
