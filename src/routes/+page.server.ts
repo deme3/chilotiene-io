@@ -28,23 +28,63 @@ export const load: PageServerLoad = async ({ url }) => {
 			}
 		},
 		{
+			$lookup: {
+				from: 'professors', // Collection to join
+				localField: 'professors', // Field in 'courses' referencing 'teachers' collection
+				foreignField: '_id', // Field in 'teachers' that matches
+				as: 'populatedProfessors' // Temporary populated field
+			}
+		},
+		{
+			$lookup: {
+				from: 'professors',
+				localField: 'adminHeads',
+				foreignField: '_id',
+				as: 'populatedAdminHeads'
+			}
+		},
+		{
+			$addFields: {
+				professorNames: '$populatedProfessors.fullName',
+				adminHeadNames: '$populatedAdminHeads.fullName'
+			}
+		},
+		{
+			$project: {
+				populatedProfessors: 0,
+				populatedAdminHeads: 0
+			}
+		},
+		{
 			$match: {
-				$and: [
+				$or: [
 					{
-						$or: [
-							{
-								'translations.v': {
-									$regex: searchTerm,
-									$options: 'i'
-								}
-							},
-							{
-								code: {
-									$regex: searchTerm,
-									$options: 'i'
-								}
+						'translations.v': {
+							$regex: searchTerm,
+							$options: 'i'
+						}
+					},
+					{
+						librettoCode: {
+							$regex: searchTerm,
+							$options: 'i'
+						}
+					},
+					{
+						professorNames: {
+							$elemMatch: {
+								$regex: searchTerm,
+								$options: 'i'
 							}
-						]
+						}
+					},
+					{
+						adminHeadNames: {
+							$elemMatch: {
+								$regex: searchTerm,
+								$options: 'i'
+							}
+						}
 					}
 				]
 			}
@@ -60,7 +100,9 @@ export const load: PageServerLoad = async ({ url }) => {
 			$project: {
 				pastVersions: 0,
 				parent: 0,
-				translations: 0
+				translations: 0,
+				professorNames: 0,
+				adminHeadNames: 0
 			}
 		},
 		{

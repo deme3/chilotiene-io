@@ -46,7 +46,7 @@
 		name="q"
 		type="text"
 		class="text-input mt-4"
-		placeholder="Cerca un corso..."
+		placeholder="Cerca un corso per nome, codice o docente..."
 		value={data.searchTerm}
 		oninput={onSearchTermChange}
 	/>
