@@ -8,7 +8,9 @@
 		description,
 		reviews,
 		workload,
-		credits
+		credits,
+		adminHeads,
+		professors
 	}: {
 		id?: string;
 		name: string;
@@ -16,6 +18,8 @@
 		reviews: number[];
 		workload: number[];
 		credits: number;
+		adminHeads: string[];
+		professors: string[];
 	} = $props();
 	let rating = $derived(
 		reviews.length > 0 ? reviews.reduce((acc, review) => acc + review, 0) / reviews.length : 0
@@ -24,6 +28,16 @@
 		workload.length > 0 ? workload.reduce((acc, w) => acc + w, 0) / workload.length : 0
 	);
 	let hovering = $state(false);
+
+	let bothProfessorAndHead = $derived(
+		professors.filter((professor) => adminHeads.includes(professor))
+	);
+	let uniqueProfessors = $derived(
+		professors.filter((professor) => !adminHeads.includes(professor))
+	);
+	let uniqueAdminHeads = $derived(
+		adminHeads.filter((adminHead) => !professors.includes(adminHead))
+	);
 </script>
 
 <div
@@ -49,10 +63,27 @@
 				{name}
 				<span class="text-xs text-zinc-300/75">{credits} CFU</span>
 			</h3>
-			<p class="text-sm text-zinc-300/75">
+			<p class="mb-2 text-sm text-zinc-300/75">
 				{description}
 			</p>
-			<div class="mt-2 text-sm">
+			{#if bothProfessorAndHead.length + uniqueProfessors.length + uniqueAdminHeads.length > 0}
+				<div class="text-sm">
+					{#each bothProfessorAndHead as professor, i}
+						<i class="ti ti-user" title="Docente e titolare"></i>{' '}
+						{professor}{#if i < bothProfessorAndHead.length - 1},{' '}{/if}
+					{/each}{#if bothProfessorAndHead.length > 0 && (uniqueProfessors.length > 0 || uniqueAdminHeads.length > 0)},{' '}
+					{/if}
+					{#each uniqueProfessors as professor, i}
+						<i class="ti ti-school" title="Docente"></i>{' '}
+						{professor}{#if i < uniqueProfessors.length - 1},{' '}{/if}
+					{/each}
+					{#each uniqueAdminHeads as adminHead, i}
+						<i class="ti ti-crown" title="Titolare"></i>{' '}
+						{adminHead}{#if i < uniqueAdminHeads.length - 1},{' '}{/if}
+					{/each}
+				</div>
+			{/if}
+			<div class="text-sm">
 				{#each Array.from({ length: Math.floor(rating) }, (_, i) => i)}
 					<i class="ti ti-star-filled text-yellow-400"></i>{' '}
 				{/each}

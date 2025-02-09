@@ -67,6 +67,8 @@
 					reviews={course.reviews}
 					workload={course.workload}
 					credits={course.credits}
+					professors={course.professors.map((x) => x.fullName)}
+					adminHeads={course.adminHeads.map((x) => x.fullName)}
 				/>
 			{/each}
 		{:catch error}

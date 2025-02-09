@@ -80,10 +80,17 @@ export const load: PageServerLoad = async ({ url }) => {
 	return {
 		searchTerm,
 		courses: courses
-			.then((dehydratedResults) => {
-				return (dehydratedResults[0].results as ICourse[]).map((dehydratedCourse) =>
-					Course.hydrate.bind(Course)(dehydratedCourse)
+			.then(async (dehydratedResults) => {
+				const hydratedCourses = (dehydratedResults[0].results as ICourse[]).map(
+					(dehydratedCourse) => Course.hydrate.bind(Course)(dehydratedCourse)
 				);
+
+				const populatedCourses = [];
+				for (const course of hydratedCourses) {
+					populatedCourses.push(await course.populateCourse());
+				}
+
+				return populatedCourses;
 			})
 			.then((hydratedResults) =>
 				hydratedResults.map((course) => ({
