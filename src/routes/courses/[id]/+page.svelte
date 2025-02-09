@@ -237,7 +237,7 @@
 					</div>
 					<div class="flex items-center gap-2">
 						{#if true}
-							<label class="flex items-center gap-2 text-sm text-orange-600">
+							<label class="pointer-events-auto flex items-center gap-2 text-sm text-orange-600">
 								<input type="checkbox" class="form-checkbox" name="imported" />
 								<span>
 									Importata dal web (<i class="ti ti-tools"></i>)
