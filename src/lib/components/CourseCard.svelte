@@ -59,8 +59,8 @@
 	role="button"
 	tabindex="0"
 >
-	<div class="flex cursor-pointer items-center justify-between gap-8">
-		<div>
+	<div class="flex h-full cursor-pointer items-center justify-between gap-8">
+		<div class="grid h-full grid-rows-[auto,auto,1fr,auto,auto]">
 			<div class="font-mono text-xs text-zinc-300/75">{code}</div>
 			<h3 class="text-xl font-bold">
 				{name}
