@@ -2,7 +2,7 @@
 import { ChapterScope } from '$lib/ChapterScope';
 import { SSDCode } from '$lib/server/models/SSD';
 import mongoose, { Schema, type HydratedDocument, type SchemaDefinition } from 'mongoose';
-import { type IProfessor } from './Professor';
+import Professor, { type IProfessor } from './Professor';
 import './Professor';
 import type { CourseData } from '$lib/server/models/CoursesList';
 
@@ -439,6 +439,24 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 		ssd = obj.ssd.split(',').map((s) => s.trim());
 	}
 
+	const adminHeads = [];
+	for (const head of obj.responsabili) {
+		try {
+			adminHeads.push(await Professor.importFrom(head));
+		} catch {
+			continue;
+		}
+	}
+
+	const professors = [];
+	for (const prof of obj.docenti) {
+		try {
+			professors.push(await Professor.importFrom(prof));
+		} catch {
+			continue;
+		}
+	}
+
 	const baseDocument = {
 		ordinamento: obj.ordinamento_aa.toString(),
 		librettoCode: obj.adCod,
@@ -488,7 +506,9 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 						code: obj.modulo_di.cod,
 						librettoCode: obj.modulo_di.adCod
 					}
-				: undefined
+				: undefined,
+		adminHeads,
+		professors
 	};
 
 	const anyoneLookingForMe = await this.find({
@@ -504,8 +524,6 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 		const minimalPojo = {
 			...existingPojo,
 			parent: undefined,
-			adminHeads: undefined,
-			professors: undefined,
 			reviews: undefined,
 			pastVersions: undefined
 		} as ICommonCourseData;
