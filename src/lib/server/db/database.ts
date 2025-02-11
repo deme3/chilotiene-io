@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import config from '$lib/server/db/config';
+import config from '$lib/server/config';
 
 let authPart = '';
 if (config.database.username && config.database.password) {

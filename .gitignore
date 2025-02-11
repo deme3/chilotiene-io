@@ -22,6 +22,6 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-src/lib/server/db/config.ts
+src/lib/server/config.ts
 logs/*
 data/*

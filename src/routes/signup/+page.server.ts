@@ -1,11 +1,14 @@
 import * as auth from '$lib/server/auth';
+import * as mail from '$lib/server/mail';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import User from '$lib/server/db/models/User';
+import ConfirmationToken from '$lib/server/db/models/ConfirmationToken';
 
 export const load: PageServerLoad = async () => {};
 
 export const actions = {
-	default: async ({ request, cookies }) => {
+	register: async ({ request }) => {
 		const formData = await request.formData();
 
 		if (!formData.has('fullName') || !formData.has('email') || !formData.has('password')) {
@@ -29,9 +32,50 @@ export const actions = {
 			return error(400, 'Email must be a valid @studenti.unitn.it or @unitn.it email.');
 		}
 
-		const newUser = await auth.registerNewUser(fullName, email, password);
+		const { user: newUser, token } = await auth.registerNewUser(fullName, email, password);
 		if (!newUser) error(500);
 
-		await auth.performLogin(email, password, cookies, request.headers.get('user-agent') ?? '');
+		return {
+			success: true,
+			user: { ...newUser.toObject({ flattenObjectIds: true }) },
+			token: { ...token.toObject({ flattenObjectIds: true }) }
+		};
+	},
+	resend: async ({ request }) => {
+		const formData = await request.formData();
+
+		if (!formData.has('email')) {
+			return error(400, 'Email is required');
+		}
+		if (!formData.has('token')) {
+			return error(400, 'Token is required');
+		}
+
+		const email = formData.get('email') as string;
+		const token = formData.get('token') as string;
+
+		if (typeof email !== 'string' || typeof token !== 'string') {
+			return error(400, 'Invalid form data');
+		}
+
+		const user = await User.findOne({ emailAddress: email, confirmed: false });
+		if (!user) {
+			return error(400, 'User not found');
+		}
+
+		const confirmationToken = await ConfirmationToken.findOne({ token, user: user._id });
+		if (!confirmationToken) {
+			return error(400, 'Invalid token');
+		}
+
+		const newToken = await ConfirmationToken.createFor(user._id);
+		await mail.sendConfirmationToken(user, newToken);
+
+		return {
+			success: true,
+			resent: true,
+			user: { ...user.toObject({ flattenObjectIds: true }) },
+			token: { ...newToken.toObject({ flattenObjectIds: true }) }
+		};
 	}
 };

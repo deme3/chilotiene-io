@@ -6,10 +6,12 @@ const UserSchema: Schema = new Schema({
 	emailAddress: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
 	role: { type: String, enum: Object.values(UserRole), required: true },
+	confirmed: { type: Boolean, required: true, default: false },
+	confirmedAt: { type: Date },
 	createdAt: { type: Date, required: true, default: Date.now }
 });
 
-export interface IUser extends mongoose.Document {
+export interface IUser extends mongoose.Document<mongoose.Types.ObjectId> {
 	/**
 	 * The full name of the user.
 	 */
@@ -29,6 +31,16 @@ export interface IUser extends mongoose.Document {
 	 * The role of the user.
 	 */
 	role: UserRole;
+
+	/**
+	 * Whether the user has confirmed their e-mail address.
+	 */
+	confirmed: boolean;
+
+	/**
+	 * The date when the user confirmed their e-mail address.
+	 */
+	confirmedAt?: Date;
 
 	/**
 	 * The date when the user was registered.

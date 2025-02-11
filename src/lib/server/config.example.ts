@@ -5,5 +5,8 @@ export default {
 		name: 'DB_NAME?authSource=admin',
 		username: 'USERNAME',
 		password: 'PASSWORD'
+	},
+	mail: {
+		api_key: 'API_KEY'
 	}
 };

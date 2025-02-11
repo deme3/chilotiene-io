@@ -8,6 +8,11 @@ import type { IUser, IUserMethods } from '$lib/server/db/models/User';
 import mongoose from 'mongoose';
 import User from '$lib/server/db/models/User';
 import { UserRole } from '../UserRole';
+import ConfirmationToken, {
+	type IConfirmationToken,
+	type IConfirmationTokenMethods
+} from './db/models/ConfirmationToken';
+import * as mail from '$lib/server/mail';
 
 export const COOKIE_NAME = 'AuthToken';
 
@@ -133,7 +138,10 @@ export async function registerNewUser(
 	emailAddress: string,
 	password: string,
 	role: UserRole = UserRole.User
-): Promise<mongoose.HydratedDocument<IUser, IUserMethods>> {
+): Promise<{
+	user: mongoose.HydratedDocument<IUser, IUserMethods>;
+	token: mongoose.HydratedDocument<IConfirmationToken, IConfirmationTokenMethods>;
+}> {
 	const hashedPassword = await bcrypt.hash(password, 10);
 	if (typeof fullName !== 'string' || typeof emailAddress !== 'string') {
 		throw new Error('Invalid user data provided.');
@@ -143,12 +151,18 @@ export async function registerNewUser(
 		throw new Error('User already exists');
 	}
 
-	return await User.create({
+	const user = await User.create({
 		fullName,
 		emailAddress,
 		password: hashedPassword,
-		role
+		role,
+		confirmed: false
 	});
+
+	const confirmationToken = await ConfirmationToken.createFor(user._id);
+	await mail.sendConfirmationToken(user, confirmationToken);
+
+	return { user, token: confirmationToken };
 }
 
 export type LoginInfo = {
