@@ -11,6 +11,9 @@ type Grade = 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 30
 
 export interface IReview {
 	_id: mongoose.Types.ObjectId;
+	authorId?: mongoose.Types.ObjectId;
+	anonymous: boolean;
+	anonymousVerified: boolean;
 	authorName?: string;
 	text: string;
 	workload: FractionalRating;
@@ -174,7 +177,7 @@ export interface ICommonCourseData {
 export interface ICourse extends ICommonCourseData {
 	adminHeads: mongoose.Types.ObjectId[];
 	professors: mongoose.Types.ObjectId[];
-	reviews: IReview[];
+	reviews: (mongoose.Document & IReview)[];
 	pastVersions: ICourseDoc[];
 }
 
@@ -334,6 +337,9 @@ const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 			type: [
 				new Schema<IReview>({
 					authorName: { type: String, required: false },
+					authorId: { type: Schema.Types.ObjectId, required: false },
+					anonymous: { type: Boolean, required: true, default: true },
+					anonymousVerified: { type: Boolean, required: true, default: false },
 					text: { type: String, required: true },
 					workload: {
 						type: Number,

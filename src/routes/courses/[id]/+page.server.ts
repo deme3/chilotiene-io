@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions = {
-	default: async ({ params, request }) => {
+	default: async ({ params, request, locals }) => {
 		if (typeof params.id !== 'string') {
 			return error(404, 'Course not found');
 		}
@@ -60,10 +60,15 @@ export const actions = {
 			if (grade < 18 || grade > 31) {
 				return error(400, 'Grade must be between 18 and 31');
 			}
+
+			if (isNaN(grade)) {
+				grade = undefined;
+			}
 		}
 
 		const review = formData.get('review') as string;
 		const imported = formData.get('imported') === 'on';
+		const anonymous = formData.get('anonymous') === 'on';
 		const quality = parseFloat(formData.get('quality') as string);
 		const workload = parseFloat(formData.get('workload') as string);
 
@@ -77,9 +82,15 @@ export const actions = {
 		}
 
 		if (
+			// not(anonymous) => typeof author === 'string'
+			// translated as OR statement
+			// anonymous OR typeof author === 'string'
+			// ANONYM | AUTHORSTR
+			//   T
 			typeof author !== 'string' ||
 			typeof review !== 'string' ||
 			typeof imported !== 'boolean' ||
+			typeof anonymous !== 'boolean' ||
 			typeof quality !== 'number' ||
 			typeof workload !== 'number'
 		) {
@@ -87,9 +98,12 @@ export const actions = {
 		}
 
 		course.reviews.push({
-			authorName: author,
+			authorName: anonymous ? '' : (locals.user?.user?.fullName ?? author),
+			authorId: anonymous ? undefined : locals.user?.user?.id,
 			text: review,
 			imported,
+			anonymous,
+			anonymousVerified: anonymous && !!locals.user?.user,
 			quality,
 			workload,
 			grade

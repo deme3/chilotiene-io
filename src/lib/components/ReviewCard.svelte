@@ -1,31 +1,50 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { base } from '$app/paths';
 
 	const {
 		author,
+		authorId,
 		text,
 		date,
 		rating,
 		workload,
 		grade,
-		sourced
+		sourced,
+		anonymousVerified
 	}: {
 		author?: string;
+		authorId?: string;
 		text: string;
 		date: Date;
 		rating: number;
 		workload: number;
 		grade?: number;
 		sourced?: boolean;
+		anonymousVerified?: boolean;
 	} = $props();
 </script>
 
 <div class="rounded-lg bg-zinc-900 p-4 shadow-lg">
 	<div class="flex items-center justify-between gap-4">
 		<div>
-			{#if author}
-				<h3 class="text-md font-bold">{author}</h3>
-			{/if}
+			<h3
+				class="text-md font-bold"
+				class:opacity-50={!author && !anonymousVerified}
+				class:text-white={!!authorId || anonymousVerified}
+			>
+				{#if author}
+					{#if authorId}
+						<a href="{base}/profile/{authorId}">{author}</a>{' '}<i class="ti ti-circle-check"></i>
+					{:else}
+						{author}
+					{/if}
+				{:else if anonymousVerified}
+					Anonimo verificato <i class="ti ti-circle-check"></i>
+				{:else}
+					Anonimo <i class="ti ti-user-question"></i>
+				{/if}
+			</h3>
 			<p class="text-xs text-zinc-300/50">
 				{date.toLocaleDateString(browser ? navigator.language : 'it-IT', {
 					year: 'numeric',

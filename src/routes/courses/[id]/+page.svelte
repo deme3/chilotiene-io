@@ -3,6 +3,7 @@
 	import Accordion from '$lib/components/Accordion.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import StarsSelect from '$lib/components/StarsSelect.svelte';
+	import SwitchButton from '$lib/components/SwitchButton.svelte';
 	import { UserRole } from '$lib/UserRole';
 	import type { PageProps } from './$types';
 
@@ -32,7 +33,9 @@
 	let workloadShields = $state(0);
 	let workloadPreview = $state(0);
 
-	let focusFromClick = $state(false);
+	let authorNameInput: HTMLInputElement;
+	let reviewImported = $state(false);
+	let reviewAnonymous = $state(true);
 
 	let allowSubmit = $derived(reviewStars >= 0.5 && workloadShields >= 0.5);
 
@@ -191,13 +194,19 @@
 				};
 			}}
 		>
-			<div class="flex flex-col lg:flex-row">
+			<div class="relative flex flex-col has-[input:focus]:z-30 lg:flex-row">
 				<input
+					bind:this={authorNameInput}
 					name="author"
 					type="text"
 					class="text-input w-full rounded-b-none border-b-zinc-800 border-r-zinc-800 bg-zinc-900 focus:z-10 max-lg:border-b max-lg:border-r-0 lg:rounded-tr-none lg:border-r"
+					oninput={(e) => {
+						reviewAnonymous = !e.currentTarget.value;
+					}}
 					placeholder="Nome (opzionale)"
+					disabled={!reviewAnonymous && !!data.user}
 				/>
+
 				<input
 					name="grade"
 					type="number"
@@ -210,42 +219,10 @@
 			<input name="quality" type="hidden" value={reviewStars} />
 			<input name="workload" type="hidden" value={workloadShields} />
 
-			<div
-				class="cursor-text rounded-b-md border-t border-zinc-800 ring-unitn/55 has-[textarea:focus]:ring-2"
-				onclick={(e) => {
-					focusFromClick = true;
-					if (e.target === e.currentTarget) {
-						e.currentTarget?.querySelector('textarea')?.focus();
-						focusFromClick = false;
-					}
-				}}
-				onkeydown={(e) => {
-					if (e.key === 'Space' && e.target === e.currentTarget) {
-						e.currentTarget?.querySelector('textarea')?.focus();
-					}
-				}}
-				onfocus={(e) => {
-					let target = e.currentTarget;
-
-					setTimeout(() => {
-						// In a timeout because click happens after focus, this way we can
-						// check if it was a click or a tab focus
-
-						// Clicks have to be filtered, tab focus should be allowed as usual
-						if (!focusFromClick) {
-							target?.querySelector('textarea')?.focus();
-						} else {
-							// Reset the flag, just in case
-							focusFromClick = false;
-						}
-					}, 100);
-				}}
-				role="textbox"
-				tabindex="0"
-			>
+			<div class="relative z-20 rounded-b-md border-t border-zinc-800">
 				<textarea
 					name="review"
-					class="text-input block w-full resize-none rounded-none bg-zinc-900 !ring-0"
+					class="text-input block w-full resize-none rounded-none bg-zinc-900 ring-unitn/55 focus:ring-2"
 					placeholder="Scrivi una recensione..."
 					rows="3"
 					required
@@ -254,40 +231,60 @@
 							e.currentTarget?.form?.requestSubmit();
 						}
 					}}
-					onfocus={(e) => {
-						focusFromClick = false;
-					}}
-					onblur={(e) => {
-						focusFromClick = false;
-					}}
 				></textarea>
 				<div
-					class="pointer-events-none flex flex-col items-center justify-between rounded-b-md bg-zinc-900 p-2 md:flex-row"
+					class="relative -z-10 flex flex-col items-center justify-between rounded-b-md border-t border-zinc-800 bg-zinc-900 p-2 md:flex-row"
 				>
-					<div class="pointer-events-auto flex cursor-default items-center gap-2 px-2">
-						<StarsSelect bind:fixedValue={reviewStars} bind:safeValue={reviewPreview} />
-						<div class="mr-8 font-semibold text-yellow-400">{reviewPreview}</div>
-						<StarsSelect
-							bind:fixedValue={workloadShields}
-							bind:safeValue={workloadPreview}
-							iconZero="ti-shield"
-							iconHalf="component:HalfShieldIcon"
-							iconFull="ti-shield-filled"
-							color="red"
-						/>
-						<div class="font-semibold text-red-500/75">{workloadPreview}</div>
+					<div class="flex cursor-default items-center gap-2 px-2">
+						<div class="flex flex-col">
+							<div class="text-sm font-semibold text-yellow-400">Qualità</div>
+							<div class="flex items-center gap-2">
+								<StarsSelect bind:fixedValue={reviewStars} bind:safeValue={reviewPreview} />
+								<div class="mr-8 font-semibold text-yellow-400">{reviewPreview}</div>
+							</div>
+						</div>
+						<div class="flex flex-col">
+							<div class="text-sm font-semibold text-red-500">Difficoltà</div>
+							<div class="flex items-center gap-2">
+								<StarsSelect
+									bind:fixedValue={workloadShields}
+									bind:safeValue={workloadPreview}
+									iconZero="ti-shield"
+									iconHalf="component:HalfShieldIcon"
+									iconFull="ti-shield-filled"
+									color="red"
+								/>
+								<div class="font-semibold text-red-500/75">{workloadPreview}</div>
+							</div>
+						</div>
 					</div>
-					<div class="flex flex-col items-stretch gap-2 self-stretch md:flex-row md:items-center">
+					<div class="flex flex-col items-stretch gap-4 self-stretch lg:flex-row lg:items-center">
 						{#if data.user && data.user.role === UserRole.Admin}
 							<label
-								class="pointer-events-auto flex items-center gap-2 self-center text-sm text-orange-600 md:self-auto"
+								class="flex items-center gap-2 self-center text-sm text-orange-600 md:self-auto"
 							>
-								<input type="checkbox" class="form-checkbox" name="imported" />
-								<span>
-									Importata dal web (<i class="ti ti-tools"></i>)
-								</span>
+								<input type="hidden" name="imported" value={reviewImported ? 'on' : 'off'} />
+								<SwitchButton
+									variant="orange"
+									label="Importata dal web"
+									bind:checked={reviewImported}
+								/>
+								<span>Importata dal web</span>
 							</label>
 						{/if}
+						<label class="flex items-center gap-2 self-center text-sm text-unitn md:self-auto">
+							<input type="hidden" name="anonymous" value={reviewAnonymous ? 'on' : 'off'} />
+							<SwitchButton
+								label="Anonimo"
+								bind:checked={reviewAnonymous}
+								onchange={() => {
+									if (reviewAnonymous && authorNameInput) authorNameInput.value = '';
+									else if (data.user?.fullName && !reviewAnonymous)
+										authorNameInput.value = data.user.fullName;
+								}}
+							/>
+							<span>Anonimo</span>
+						</label>
 						<button
 							class="pointer-events-auto rounded-md bg-unitn px-6 py-2 text-white disabled:opacity-50"
 							type="submit"
@@ -298,15 +295,17 @@
 			</div>
 		</form>
 		<div class="mt-3 grid gap-3">
-			{#each data.course.reviews as review}
+			{#each data.course.reviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as review}
 				<ReviewCard
 					author={review.authorName}
+					authorId={review.authorId?.toString()}
 					text={review.text}
 					date={review.createdAt}
 					rating={review.quality}
 					workload={review.workload}
 					grade={review.grade}
 					sourced={review.imported}
+					anonymousVerified={review.anonymousVerified}
 				/>
 			{/each}
 		</div>
