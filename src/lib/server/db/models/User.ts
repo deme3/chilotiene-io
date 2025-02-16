@@ -1,5 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { UserRole } from '$lib/UserRole';
+import type { IReview } from './Course';
+import Course from './Course';
 
 const UserSchema: Schema = new Schema({
 	fullName: { type: String, required: true },
@@ -53,10 +55,20 @@ export interface IUserModel extends mongoose.Model<IUser, NonNullable<unknown>, 
 	// Static methods go here
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IUserMethods {
 	// Instance methods go here
+	findReviews(): Promise<(mongoose.Document & IReview)[]>;
 }
+
+UserSchema.method('findReviews', async function (this: IUser): Promise<
+	(mongoose.Document & IReview)[]
+> {
+	// Reviews are subdocuments of Course
+	const reviews = (await Course.find({ 'reviews.authorId': this._id }))
+		.map((course) => [...course.reviews])
+		.flat();
+	return reviews;
+});
 
 // Create the Session model
 let User: IUserModel;
