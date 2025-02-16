@@ -7,6 +7,7 @@
 		code,
 		name,
 		description,
+		departmentName,
 		reviews,
 		workload,
 		credits,
@@ -18,6 +19,7 @@
 		code: string;
 		name: string;
 		description: string;
+		departmentName: string;
 		reviews: number[];
 		workload: number[];
 		grades: number[];
@@ -73,6 +75,7 @@
 				{name}
 				<span class="text-xs text-zinc-300/75">{credits} CFU</span>
 			</h3>
+			<p class="mb-2 text-xs text-zinc-300/75">{departmentName}</p>
 			<p class="mb-2 text-sm text-zinc-300/75">
 				{description}
 			</p>

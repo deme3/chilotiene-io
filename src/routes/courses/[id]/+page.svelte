@@ -116,6 +116,7 @@
 						code={child.librettoCode}
 						name={child.name['it']}
 						description={child.chapters[ChapterScope.TeachingObjectives].it}
+						departmentName={child.department.name['it']}
 						reviews={child.ratings}
 						workload={child.workload}
 						grades={child.grades}

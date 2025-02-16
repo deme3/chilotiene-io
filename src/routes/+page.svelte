@@ -89,6 +89,7 @@
 					code={course.librettoCode}
 					name={course.name['it']}
 					description={course.chapters[ChapterScope.TeachingObjectives].it}
+					departmentName={course.department.name['it']}
 					reviews={course.reviews}
 					workload={course.workload}
 					grades={course.grades}

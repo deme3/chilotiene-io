@@ -143,7 +143,7 @@ export const load: PageServerLoad = async ({ url }) => {
 			})
 			.then((hydratedResults) =>
 				hydratedResults.map((course) => ({
-					...course.toObject({ flattenMaps: true, flattenObjectIds: true }),
+					...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
 					id: course.id,
 					reviews: course.getRatings(),
 					workload: course.getWorkloads(),

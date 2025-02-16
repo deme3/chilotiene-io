@@ -5,6 +5,8 @@ import mongoose, { Schema, type HydratedDocument, type SchemaDefinition } from '
 import Professor, { type IProfessor } from './Professor';
 import './Professor';
 import type { CourseData } from '$lib/server/models/CoursesList';
+import type { IDepartment } from './Department';
+import Department from './Department';
 
 type FractionalRating = 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5;
 type Grade = 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 30 | 31;
@@ -175,6 +177,7 @@ export interface ICommonCourseData {
 }
 
 export interface ICourse extends ICommonCourseData {
+	department: string;
 	adminHeads: mongoose.Types.ObjectId[];
 	professors: mongoose.Types.ObjectId[];
 	reviews: (mongoose.Document & IReview)[];
@@ -214,6 +217,7 @@ export interface ICourseModel
 
 type PopulatedCourse = HydratedDocument<
 	Omit<ICourse, 'parent' | 'adminHeads' | 'professors'> & {
+		department: IDepartment;
 		parent?: ICourse;
 		adminHeads: IProfessor[];
 		professors: IProfessor[];
@@ -370,6 +374,13 @@ const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 	}
 );
 
+CourseSchema.virtual('department', {
+	ref: 'Department',
+	localField: 'departmentCode',
+	foreignField: 'code',
+	justOne: true
+});
+
 CourseSchema.method('getRemoteURL', function (): string {
 	return `https://unitn.coursecatalogue.cineca.it/insegnamenti/${this.offeringYear}/${this.code}/${this.ordinamento}/${this.degreeTrackCode}/${this.degreeCode}?coorte=${this.coorte}&schemaid=${this.schemaId}`;
 });
@@ -380,6 +391,7 @@ CourseSchema.method('getDetailsURL', function (): string {
 
 CourseSchema.method('populateCourse', async function (): Promise<PopulatedCourse> {
 	return await this.populate<PopulatedCourse>([
+		{ path: 'department' },
 		{ path: 'parent', model: 'Course' },
 		{ path: 'adminHeads', model: 'Professor' },
 		{ path: 'professors', model: 'Professor' }
@@ -449,6 +461,20 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 	if (!('dip_cod' in obj)) {
 		console.log('Warning: Department code not available.');
 		obj.dip_cod = '0';
+	}
+
+	const department = await Department.findOne({ code: obj.dip_cod });
+	const newDepartmentInfo = {
+		code: obj.dip_cod,
+		name: {
+			it: obj.dip_des_it ?? 'Sconosciuto',
+			en: obj.dip_des_en ?? 'Unknown'
+		}
+	};
+
+	if (!department) {
+		console.log('Department not found, creating...');
+		await Department.create(newDepartmentInfo);
 	}
 
 	let ssd: string[] = [];
@@ -545,6 +571,7 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 		const existingPojo = existing.toObject() as ICourse;
 		const minimalPojo = {
 			...existingPojo,
+			department: undefined,
 			parent: undefined,
 			reviews: undefined,
 			pastVersions: undefined
