@@ -18,17 +18,18 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	return {
 		course: {
-			...course.toObject({ flattenMaps: true, flattenObjectIds: true }),
+			...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
 			id: course.id,
 			ratings: course.getRatings(),
-			workload: course.getWorkloads()
+			workload: course.getWorkloads(),
+			grades: course.getGrades()
 		},
 		children: children.map((child) => ({
-			...child.toObject({ flattenMaps: true, flattenObjectIds: true }),
+			...child.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
 			id: child.id,
 			ratings: child.getRatings(),
 			workload: child.getWorkloads(),
-			grades: course.getGrades()
+			grades: child.getGrades()
 		}))
 	};
 };
