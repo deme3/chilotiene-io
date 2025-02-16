@@ -48,8 +48,10 @@
 </script>
 
 <div
-	class="rounded-lg bg-zinc-800 p-4 shadow-lg hover:bg-zinc-700 hover:transition-colors"
-	onmouseenter={() => (hovering = true)}
+	class="rounded-lg bg-zinc-800 p-4 shadow-lg"
+	class:hover:transition-colors={!!id}
+	class:hover:bg-zinc-700={!!id}
+	onmouseenter={() => (hovering = !!id)}
 	onmouseleave={() => (hovering = false)}
 	onclick={() => {
 		if (id) {
@@ -64,7 +66,7 @@
 	role="button"
 	tabindex="0"
 >
-	<div class="flex h-full cursor-pointer items-center justify-between gap-8">
+	<div class="flex h-full items-center justify-between gap-8" class:cursor-default={!id}>
 		<div class="grid h-full grid-rows-[auto,auto,1fr,auto,auto]">
 			<div class="font-mono text-xs text-zinc-300/75">{code}</div>
 			<h3 class="text-xl font-bold">

@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import { ChapterScope } from '$lib/ChapterScope';
 	import Accordion from '$lib/components/Accordion.svelte';
+	import CourseCard from '$lib/components/CourseCard.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import StarsSelect from '$lib/components/StarsSelect.svelte';
 	import SwitchButton from '$lib/components/SwitchButton.svelte';
@@ -9,6 +10,11 @@
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+
+	let overallReviews = $derived([
+		...data.course.reviews,
+		...data.children.flatMap((x) => x.reviews)
+	]);
 
 	let bothProfessorAndHead = $derived(
 		data.course.professors.filter((professor) =>
@@ -41,9 +47,8 @@
 	let allowSubmit = $derived(reviewStars >= 0.5 && workloadShields >= 0.5);
 
 	let rating = $derived(
-		data.course.reviews.length > 0
-			? data.course.reviews.reduce((acc, review) => acc + review.quality, 0) /
-					data.course.reviews.length
+		overallReviews.length > 0
+			? overallReviews.reduce((acc, review) => acc + review.quality, 0) / overallReviews.length
 			: 0
 	);
 	let avgWorkload = $derived(
@@ -52,11 +57,11 @@
 			: 0
 	);
 	let avgGrade = $derived(
-		data.course.reviews.length > 0
-			? data.course.reviews
+		overallReviews.length > 0
+			? overallReviews
 					.filter((review) => !!review.grade)
 					.reduce((acc, review) => acc + review.grade!, 0) /
-					data.course.reviews.filter((review) => !!review.grade).length
+					overallReviews.filter((review) => !!review.grade).length
 			: 0
 	);
 </script>
@@ -101,6 +106,27 @@
 </div>
 
 <section class="mt-4 flex flex-col gap-4">
+	{#if data.children.length > 0}
+		<div>
+			<h3 class="text-lg font-bold">Unità didattiche</h3>
+			<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+				{#each data.children as child}
+					<CourseCard
+						id={child.id}
+						code={child.librettoCode}
+						name={child.name['it']}
+						description={child.chapters[ChapterScope.TeachingObjectives].it}
+						reviews={child.ratings}
+						workload={child.workload}
+						grades={child.grades}
+						credits={child.credits}
+						professors={child.professors.map((x) => x.fullName)}
+						adminHeads={child.adminHeads.map((x) => x.fullName)}
+					/>
+				{/each}
+			</div>
+		</div>
+	{/if}
 
 	{#if ChapterScope.TeachingObjectives in data.course.chapters && 'it' in data.course.chapters[ChapterScope.TeachingObjectives] && data.course.chapters[ChapterScope.TeachingObjectives].it.trim().length > 0}
 		<Accordion title="Obiettivi formativi">
@@ -132,6 +158,7 @@
 			<p>{data.course.chapters[ChapterScope.Bibliography].it}</p>
 		</Accordion>
 	{/if}
+	<Accordion title="Recensioni ({overallReviews.length})" noncollapsible>
 		{#snippet right()}
 			{#each Array.from({ length: Math.floor(rating) }, (_, i) => i)}
 				<i class="ti ti-star-filled text-yellow-400"></i>{' '}
@@ -275,7 +302,7 @@
 			</div>
 		</form>
 		<div class="mt-3 grid gap-3">
-			{#each data.course.reviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as review}
+			{#each overallReviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as review}
 				<ReviewCard
 					author={review.authorName}
 					authorId={review.authorId?.toString()}

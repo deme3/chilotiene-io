@@ -15,9 +15,16 @@ export const load: PageServerLoad = async ({ url }) => {
 	const courses = Course.aggregate([
 		{
 			$match: {
-				name: {
-					$exists: true
-				}
+				$and: [
+					{
+						name: {
+							$exists: true
+						}
+					},
+					{
+						parent: null
+					}
+				]
 			}
 		},
 		{
