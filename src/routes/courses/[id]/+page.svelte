@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { ChapterScope } from '$lib/ChapterScope';
 	import Accordion from '$lib/components/Accordion.svelte';
 	import ReviewCard from '$lib/components/ReviewCard.svelte';
 	import StarsSelect from '$lib/components/StarsSelect.svelte';
@@ -100,58 +101,37 @@
 </div>
 
 <section class="mt-4 flex flex-col gap-4">
-	<Accordion title="Obiettivi formativi">
-		<ol class="my-2 list-outside list-decimal pl-8 [&_li:not(:last-child)]:mb-4">
-			<li>
-				<strong>Conoscenza e capacità di comprensione</strong>
-				<p>
-					Conoscenza approfondita degli argomenti di base del calcolo di funzioni di una variabile
-					come specificato dal programma del corso. Capacità di analizzare e di comprenderne le
-					principali caratteristiche delle funzioni a valori reali differenziabili e integrabili.
-					Capacità di applicare i metodi a problemi concreti e ad altri problemi scientifici o della
-					industria.
-				</p>
-			</li>
-			<li>
-				<strong>Capacità di applicare conoscenza e comprensione</strong>
-				<p>
-					Capacità di ragionamento induttivo e deduttivo nell’affrontare problemi della natura
-					dell'analisi delle funzioni. Capacità di impostare un problema e di risolverlo utilizzando
-					opportuni strumenti dell'analisi.
-				</p>
-			</li>
-			<li>
-				<strong>Autonomia di giudizio</strong>
-				<p>
-					Capacità di sviluppare argomentazioni logiche e produrre dimostrazioni corrette. Capacità
-					di individuare i metodi più appropriati per analizzare e interpretare problemi.
-				</p>
-			</li>
-			<li>
-				<strong>Abilità comunicative</strong>
-				<p>Capacità di esporre argomenti dell'analisi matematica.</p>
-			</li>
-			<li>
-				<strong>Capacità di apprendimento</strong>
-				<p>
-					Capacità di acquisire e gestire nuove informazioni a partire dagli enunciati e
-					dimostrazioni sviluppate a lezioni.
-				</p>
-			</li>
-		</ol>
-	</Accordion>
-	<Accordion title="Prerequisiti">
-		Nozioni di base di calcolo con polinomi (divisione), basi di trigonometria etc. e tutto quanto
-		viene compreso nelle nozioni di base necessarie per affrontare l'esame di ammissione al corso di
-		laurea in informatica.
-	</Accordion>
-	<Accordion title="Contenuti del corso">
-		1. Nozioni base di logica e insiemistica. 2. Numeri reali e complessi. 3. Funzioni e loro
-		proprietà di base (iniettività, suriettività etc.) 4. Continuità 5. Limiti 6. Derivate 7.
-		Integrazione di Riemann su intervalli chiusi e limitati 8. Integrazione di Riemann generalizzata
-		(impropria). 9. Equazioni differenziali ordinarie
-	</Accordion>
-	<Accordion title="Recensioni ({data.course.reviews.length})" noncollapsible>
+
+	{#if ChapterScope.TeachingObjectives in data.course.chapters && 'it' in data.course.chapters[ChapterScope.TeachingObjectives] && data.course.chapters[ChapterScope.TeachingObjectives].it.trim().length > 0}
+		<Accordion title="Obiettivi formativi">
+			<p>{data.course.chapters[ChapterScope.TeachingObjectives].it}</p>
+		</Accordion>
+	{/if}
+	{#if ChapterScope.Prerequisites in data.course.chapters && 'it' in data.course.chapters[ChapterScope.Prerequisites] && data.course.chapters[ChapterScope.Prerequisites].it.trim().length > 0}
+		<Accordion title="Prerequisiti">
+			<p>{data.course.chapters[ChapterScope.Prerequisites].it}</p>
+		</Accordion>
+	{/if}
+	{#if ChapterScope.Scope in data.course.chapters && 'it' in data.course.chapters[ChapterScope.Scope] && data.course.chapters[ChapterScope.Scope].it.trim().length > 0}
+		<Accordion title="Contenuti del corso">
+			<p>{data.course.chapters[ChapterScope.Scope].it}</p>
+		</Accordion>
+	{/if}
+	{#if ChapterScope.TeachingMethods in data.course.chapters && 'it' in data.course.chapters[ChapterScope.TeachingMethods] && data.course.chapters[ChapterScope.TeachingMethods].it.trim().length > 0}
+		<Accordion title="Metodi didattici">
+			<p>{data.course.chapters[ChapterScope.TeachingMethods].it}</p>
+		</Accordion>
+	{/if}
+	{#if ChapterScope.ExaminationMethods in data.course.chapters && 'it' in data.course.chapters[ChapterScope.ExaminationMethods] && data.course.chapters[ChapterScope.ExaminationMethods].it.trim().length > 0}
+		<Accordion title="Modalità d'esame">
+			<p>{data.course.chapters[ChapterScope.ExaminationMethods].it}</p>
+		</Accordion>
+	{/if}
+	{#if ChapterScope.Bibliography in data.course.chapters && 'it' in data.course.chapters[ChapterScope.Bibliography] && data.course.chapters[ChapterScope.Bibliography].it.trim().length > 0}
+		<Accordion title="Testi consigliati">
+			<p>{data.course.chapters[ChapterScope.Bibliography].it}</p>
+		</Accordion>
+	{/if}
 		{#snippet right()}
 			{#each Array.from({ length: Math.floor(rating) }, (_, i) => i)}
 				<i class="ti ti-star-filled text-yellow-400"></i>{' '}
