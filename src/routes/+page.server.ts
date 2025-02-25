@@ -142,13 +142,15 @@ export const load: PageServerLoad = async ({ url }) => {
 				return populatedCourses;
 			})
 			.then((hydratedResults) =>
-				hydratedResults.map((course) => ({
-					...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
-					id: course.id,
-					reviews: course.getRatings(),
-					workload: course.getWorkloads(),
-					grades: course.getGrades()
-				}))
+				Promise.all(
+					hydratedResults.map(async (course) => ({
+						...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
+						id: course.id,
+						reviews: await course.getRatings(),
+						workload: await course.getWorkloads(),
+						grades: await course.getGrades()
+					}))
+				)
 			),
 		currentPage: pageNumber,
 		pages: courses.then(
