@@ -8,6 +8,10 @@
 	const { data }: PageProps = $props();
 </script>
 
+<svelte:head>
+	<title>Profilo di {data.profile.fullName} - Chi lo tiene...</title>
+</svelte:head>
+
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
 	<div>
 		<h1 class="small-logo font-bold text-zinc-200/50" id="logo">Profilo di</h1>

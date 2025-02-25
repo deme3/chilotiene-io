@@ -147,7 +147,7 @@ export interface ICommonCourseData {
 		unknown: number;
 	};
 	ssd: `${SSDCode}`[];
-	name: { [key: string]: string };
+	name: Map<string, string>;
 	chapters: {
 		[key in `${ChapterScope}`]: {
 			it: string;
@@ -216,7 +216,8 @@ export interface ICourseModel
 }
 
 type PopulatedCourse = HydratedDocument<
-	Omit<ICourse, 'parent' | 'adminHeads' | 'professors'> & {
+	Omit<ICourse, 'name' | 'parent' | 'adminHeads' | 'professors'> & {
+		name: Map<string, string>;
 		department: IDepartment;
 		parent?: HydratedDocument<PopulatedCourse>;
 		adminHeads: IProfessor[];
@@ -226,6 +227,11 @@ type PopulatedCourse = HydratedDocument<
 >;
 
 export interface ICourseMethods {
+	/**
+	 * Craft an internal slug for SEO purposes.
+	 */
+	getSlug(): string;
+
 	/**
 	 * Craft the URL for accessing more course information via the University
 	 * website.
@@ -379,6 +385,14 @@ CourseSchema.virtual('department', {
 	localField: 'departmentCode',
 	foreignField: 'code',
 	justOne: true
+});
+
+CourseSchema.method('getSlug', function (): string {
+	const nameSlug = this.name.get('it')?.toLowerCase().replace(/ /g, '-');
+	const codeSlug =
+		this.parent && this.librettoCode === this.code.split('/')[0] ? this.code : this.librettoCode;
+	const fullSlug = `${codeSlug}-${nameSlug}`;
+	return fullSlug;
 });
 
 CourseSchema.method('getRemoteURL', function (): string {

@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
+	import { page } from '$app/state';
 	import { ChapterScope } from '$lib/ChapterScope';
 	import Accordion from '$lib/components/Accordion.svelte';
 	import CourseCard from '$lib/components/CourseCard.svelte';
@@ -7,9 +10,9 @@
 	import StarsSelect from '$lib/components/StarsSelect.svelte';
 	import SwitchButton from '$lib/components/SwitchButton.svelte';
 	import { UserRole } from '$lib/UserRole';
-	import type { PageProps } from './$types';
+	import type { LayoutProps } from './$types';
 
-	let { data }: PageProps = $props();
+	let { data, children }: LayoutProps = $props();
 
 	let overallReviews = $derived([
 		...data.course.reviews,
@@ -66,6 +69,43 @@
 	);
 </script>
 
+<svelte:head>
+	<title>{data.course.name['it']} - Chi lo tiene...</title>
+	<meta
+		name="description"
+		content="Student reviews on UniTrento course: {data.course.name[
+			'it'
+		]} by Prof(s). {uniqueProfessors
+			.map((prof) => prof.fullName)
+			.join(', ')}. Offered by department: {data.course.department.name['it']}"
+	/>
+	<meta property="og:title" content="{data.course.name['it']} - Chi lo tiene..." />
+	<meta
+		property="og:description"
+		content="Student reviews on UniTrento course: {data.course.name[
+			'it'
+		]} by Prof(s). {uniqueProfessors
+			.map((prof) => prof.fullName)
+			.join(', ')}. Offered by department: {data.course.department.name['it']}"
+	/>
+	<meta property="og:site_name" content="Chi lo tiene..." />
+	<meta property="og:url" content="{page.url.origin}{base}/courses/{data.course.id}" />
+	<meta property="og:type" content="article" />
+	{#each uniqueProfessors as professor}
+		<meta property="article:author" content={professor.fullName} />
+		<meta
+			property="article:tag"
+			content={professor.fullName.toLowerCase().replace(' ', '-').replace('.', '').replace("'", '')}
+		/>
+	{/each}
+	<meta property="article:section" content={data.course.department.name['it']} />
+	<meta property="article:tag" content={data.course.department.name['it']} />
+	<meta property="article:tag" content={data.course.name['it']} />
+	<meta property="article:tag" content="unitn" />
+	<meta property="article:tag" content="università" />
+	<meta property="article:tag" content="trento" />
+</svelte:head>
+
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
 	<div>
 		<h1 class="small-logo font-bold text-zinc-200/50" id="logo">Chi lo tiene...</h1>
@@ -97,13 +137,19 @@
 					><i class="ti ti-user-question"></i> Nessuno?</span
 				>
 			{/if}
-			<!-- {data.course.professors[0]?.fullName ?? data.course.adminHeads[0]?.fullName} -->
 		</h3>
 	</div>
-	<button class="circular-button" aria-label="Go Back" onclick={() => history.back()}>
-		<i class="ti ti-arrow-left"></i>
-	</button>
+	<div class="flex items-center justify-end gap-4">
+		<button class="circular-button" aria-label="Go Home" onclick={() => goto(`${base}/`)}>
+			<i class="ti ti-home"></i>
+		</button>
+		<button class="circular-button" aria-label="Go Back" onclick={() => history.back()}>
+			<i class="ti ti-arrow-left"></i>
+		</button>
+	</div>
 </div>
+
+{@render children()}
 
 <section class="mt-4 flex flex-col gap-4">
 	{#if data.course.parent}
@@ -216,6 +262,7 @@
 		{/snippet}
 		<form
 			method="POST"
+			action={`${base}/courses/${data.course.id}`}
 			class="flex flex-col"
 			use:enhance={() => {
 				return async ({ result, update }) => {

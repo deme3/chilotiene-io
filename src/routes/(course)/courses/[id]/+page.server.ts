@@ -2,51 +2,8 @@ import Course, { type IReview } from '$lib/server/db/models/Course';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params }) => {
-	if (typeof params.id !== 'string') {
-		error(404, 'Course not found');
-	}
-
-	const course = await (await Course.findById(params.id))?.populateCourse();
-	const children = await Course.find({ parent: course?.id }).then((courses) =>
-		Promise.all(courses.map((course) => course.populateCourse()))
-	);
-
-	if (!course) {
-		error(404, 'Course not found');
-	}
-
-	return {
-		course: {
-			...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
-			id: course.id,
-			ratings: await course.getRatings(), // includeChildren will be left false here because we're already including the children in the response, and the frontend will calculate
-			workload: await course.getWorkloads(),
-			grades: await course.getGrades(),
-			parent: course.parent
-				? course.parent.populateCourse().then(async (course) => ({
-						...course.toObject({
-							flattenMaps: true,
-							flattenObjectIds: true,
-							virtuals: true
-						}),
-						id: course.id,
-						ratings: await course.getRatings(true),
-						workload: await course.getWorkloads(true),
-						grades: await course.getGrades(true)
-					}))
-				: null
-		},
-		children: await Promise.all(
-			children.map(async (child) => ({
-				...child.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
-				id: child.id,
-				ratings: await child.getRatings(),
-				workload: await child.getWorkloads(),
-				grades: await child.getGrades()
-			}))
-		)
-	};
+export const load: PageServerLoad = async ({ parent }) => {
+	return await parent();
 };
 
 export const actions = {

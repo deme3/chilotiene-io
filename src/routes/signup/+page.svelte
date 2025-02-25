@@ -11,6 +11,7 @@
 </script>
 
 <svelte:head>
+	<title>Sign up - Chi lo tiene...</title>
 	<style>
 		body,
 		html {

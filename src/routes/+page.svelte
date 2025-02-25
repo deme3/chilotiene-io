@@ -49,6 +49,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Chi lo tiene...</title>
+</svelte:head>
+
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
 	<div>
 		<h1 class="big-logo font-bold" id="logo">Chi lo tiene...</h1>

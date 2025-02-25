@@ -24,6 +24,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Chi lo tiene...</title>
+</svelte:head>
+
 <main class="preload">
 	{@render children()}
 	<footer class="[&_a:hover]:no-underline [&_a]:underline [&_a]:underline-offset-4">
