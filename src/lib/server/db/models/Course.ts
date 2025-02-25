@@ -218,7 +218,7 @@ export interface ICourseModel
 type PopulatedCourse = HydratedDocument<
 	Omit<ICourse, 'parent' | 'adminHeads' | 'professors'> & {
 		department: IDepartment;
-		parent?: ICourse;
+		parent?: HydratedDocument<PopulatedCourse>;
 		adminHeads: IProfessor[];
 		professors: IProfessor[];
 	},
@@ -264,17 +264,17 @@ export interface ICourseMethods {
 	/**
 	 * Get the numerical ratings of the course for each review.
 	 */
-	getRatings(): number[];
+	getRatings(includeChildren?: boolean): Promise<number[]>;
 
 	/**
 	 * Get the numerical workload of the course for each review.
 	 */
-	getWorkloads(): number[];
+	getWorkloads(includeChildren?: boolean): Promise<number[]>;
 
 	/**
 	 * Get the grades of the course for each review, if available.
 	 */
-	getGrades(): number[];
+	getGrades(includeChildren?: boolean): Promise<number[]>;
 }
 
 const commonCourseSchema: SchemaDefinition<ICourseDoc> = {
@@ -414,15 +414,47 @@ CourseSchema.method('getAverageWorkload', function (): number {
 	return workloadSum / reviews.length;
 });
 
-CourseSchema.method('getRatings', function (): number[] {
+CourseSchema.method('getRatings', async function (includeChildren: boolean = false): Promise<
+	number[]
+> {
+	if (includeChildren) {
+		const children = await Course.find({ parent: this._id });
+		const childrenReviews = await Promise.all(
+			children.map((child) => child.reviews.map((review) => review.quality))
+		);
+		const mine = this.reviews.map((review) => review.quality);
+		return mine.concat(...childrenReviews);
+	}
 	return this.reviews.map((review) => review.quality);
 });
 
-CourseSchema.method('getWorkloads', function (): number[] {
+CourseSchema.method('getWorkloads', async function (includeChildren: boolean = false): Promise<
+	number[]
+> {
+	if (includeChildren) {
+		const children = await Course.find({ parent: this._id });
+		const childrenReviews = await Promise.all(
+			children.map((child) => child.reviews.map((review) => review.workload))
+		);
+		const mine = this.reviews.map((review) => review.workload);
+		return mine.concat(...childrenReviews);
+	}
 	return this.reviews.map((review) => review.workload);
 });
 
-CourseSchema.method('getGrades', function (): number[] {
+CourseSchema.method('getGrades', async function (includeChildren: boolean = false): Promise<
+	number[]
+> {
+	if (includeChildren) {
+		const children = await Course.find({ parent: this._id });
+		const childrenReviews = await Promise.all(
+			children.map((child) =>
+				child.reviews.filter((review) => !!review.grade).map((review) => review.grade!)
+			)
+		);
+		const mine = this.reviews.filter((review) => !!review.grade).map((review) => review.grade!);
+		return mine.concat(...childrenReviews);
+	}
 	return this.reviews.filter((review) => !!review.grade).map((review) => review.grade!);
 });
 

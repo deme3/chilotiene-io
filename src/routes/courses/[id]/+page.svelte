@@ -106,6 +106,29 @@
 </div>
 
 <section class="mt-4 flex flex-col gap-4">
+	{#if data.course.parent}
+		{#await data.course.parent then parent}
+			<div>
+				<h3 class="text-lg font-bold">Insegnamento principale</h3>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<CourseCard
+						id={parent.id}
+						code={parent.librettoCode}
+						name={parent.name['it']}
+						description={parent.chapters[ChapterScope.TeachingObjectives].it}
+						departmentName={parent.department.name['it']}
+						reviews={parent.ratings}
+						workload={parent.workload}
+						grades={parent.grades}
+						credits={parent.credits}
+						professors={parent.professors.map((x) => x.fullName)}
+						adminHeads={parent.adminHeads.map((x) => x.fullName)}
+					/>
+				</div>
+			</div>
+		{/await}
+	{/if}
+
 	{#if data.children.length > 0}
 		<div>
 			<h3 class="text-lg font-bold">Unità didattiche</h3>

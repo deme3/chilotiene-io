@@ -20,17 +20,32 @@ export const load: PageServerLoad = async ({ params }) => {
 		course: {
 			...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
 			id: course.id,
-			ratings: course.getRatings(),
-			workload: course.getWorkloads(),
-			grades: course.getGrades()
+			ratings: await course.getRatings(), // includeChildren will be left false here because we're already including the children in the response, and the frontend will calculate
+			workload: await course.getWorkloads(),
+			grades: await course.getGrades(),
+			parent: course.parent
+				? course.parent.populateCourse().then(async (course) => ({
+						...course.toObject({
+							flattenMaps: true,
+							flattenObjectIds: true,
+							virtuals: true
+						}),
+						id: course.id,
+						ratings: await course.getRatings(true),
+						workload: await course.getWorkloads(true),
+						grades: await course.getGrades(true)
+					}))
+				: null
 		},
-		children: children.map((child) => ({
-			...child.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
-			id: child.id,
-			ratings: child.getRatings(),
-			workload: child.getWorkloads(),
-			grades: child.getGrades()
-		}))
+		children: await Promise.all(
+			children.map(async (child) => ({
+				...child.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
+				id: child.id,
+				ratings: await child.getRatings(),
+				workload: await child.getWorkloads(),
+				grades: await child.getGrades()
+			}))
+		)
 	};
 };
 
