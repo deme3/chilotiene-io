@@ -7,6 +7,7 @@
 	import CourseCardSkeleton from '$lib/components/CourseCardSkeleton.svelte';
 	import { UserRole } from '$lib/UserRole';
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 
 	let { data }: PageProps = $props();
 
@@ -16,6 +17,35 @@
 	function onSearchTermChange() {
 		if (searchTimer) clearTimeout(searchTimer);
 		searchTimer = setTimeout(() => searchForm.requestSubmit(), 500);
+	}
+
+	const currentFilters = $derived(new URLSearchParams(page.url.search));
+	function gotoDepartment(department: string) {
+		const newFilters = new URLSearchParams(currentFilters.toString());
+		newFilters.append('department', department);
+
+		if (newFilters.has('page')) {
+			newFilters.set('page', '1');
+		}
+
+		goto(`?${newFilters.toString()}`);
+	}
+
+	function removeDepartment(department: string) {
+		const newFilters = new URLSearchParams(currentFilters.toString());
+		newFilters.delete('department', department);
+
+		if (newFilters.has('page')) {
+			newFilters.set('page', '1');
+		}
+
+		goto(`?${newFilters.toString()}`);
+	}
+
+	function getPageHref(page: number) {
+		const newFilters = new URLSearchParams(currentFilters.toString());
+		newFilters.set('page', page.toString());
+		return `?${newFilters.toString()}`;
 	}
 </script>
 
@@ -76,6 +106,33 @@
 	/>
 </form>
 
+<section class="mt-2 flex items-start gap-2 overflow-x-auto pb-4">
+	{#each data.selectedDepartments.map((x) => data.departments.find((y) => y.code === x)!) as department}
+		<button
+			class="generic-button zinc flex items-center gap-2 whitespace-nowrap px-3 text-sm"
+			aria-label="Rimuovi filtro: {department.name['it']}"
+			onclick={() => removeDepartment(department.code)}
+		>
+			{department.name['it']} <i class="ti ti-x"></i>
+		</button>
+	{/each}
+</section>
+
+<section class="mt-2 flex flex-col gap-1">
+	<div class="ml-1 text-xs text-zinc-400">Filtra per Dipartimento:</div>
+	<div class="flex items-start gap-2 overflow-x-auto pb-4">
+		{#each data.departments.filter((dep) => dep.code !== '0' && !data.selectedDepartments.includes(dep.code)) as department}
+			<button
+				class="generic-button zinc whitespace-nowrap rounded-full text-sm"
+				aria-label="Filtra per dipartimento: {department.name['it']}"
+				onclick={() => gotoDepartment(department.code)}
+			>
+				{department.name['it']}
+			</button>
+		{/each}
+	</div>
+</section>
+
 <section class="mt-4">
 	<div class="grid gap-4 lg:grid-cols-2">
 		{#await data.courses}
@@ -107,7 +164,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="First page"
-				href="?page=1&q={data.searchTerm}"
+				href={getPageHref(1)}
 				class:disabled={data.currentPage === 1}
 				aria-disabled={data.currentPage === 1}
 				data-sveltekit-noscroll><i class="ti ti-chevrons-left"></i></a
@@ -115,7 +172,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="Previous page"
-				href="?page={Math.max(1, data.currentPage - 1)}&q={data.searchTerm}"
+				href={getPageHref(Math.max(1, data.currentPage - 1))}
 				class:disabled={data.currentPage === 1}
 				aria-disabled={data.currentPage === 1}
 				data-sveltekit-noscroll><i class="ti ti-chevron-left"></i></a
@@ -123,7 +180,7 @@
 			{#each Array.from({ length: pages }, (_, i) => i + 1).filter((i) => i >= data.currentPage - 3 && i <= data.currentPage + 5) as i}
 				<a
 					class="generic-button zinc square"
-					href="?page={i}&q={data.searchTerm}"
+					href={getPageHref(i)}
 					data-sveltekit-noscroll
 					class:disabled={i === data.currentPage}
 					aria-disabled={i === data.currentPage}>{i}</a
@@ -132,7 +189,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="Next page"
-				href="?page={Math.min(pages, data.currentPage + 1)}&q={data.searchTerm}"
+				href={getPageHref(Math.min(pages, data.currentPage + 1))}
 				class:disabled={data.currentPage === pages}
 				aria-disabled={data.currentPage === pages}
 				data-sveltekit-noscroll><i class="ti ti-chevron-right"></i></a
@@ -140,7 +197,7 @@
 			<a
 				class="generic-button zinc square"
 				aria-label="Last Page"
-				href="?page={pages}&q={data.searchTerm}"
+				href={getPageHref(pages)}
 				class:disabled={data.currentPage === pages}
 				aria-disabled={data.currentPage === pages}
 				data-sveltekit-noscroll><i class="ti ti-chevrons-right"></i></a

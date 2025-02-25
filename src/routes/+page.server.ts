@@ -1,4 +1,5 @@
 import Course, { type ICourse } from '$lib/server/db/models/Course';
+import Department from '$lib/server/db/models/Department';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -12,6 +13,8 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	if (pageNumber < 1) pageNumber = 1;
 
+	const selectedDepartments = url.searchParams.getAll('department');
+
 	const courses = Course.aggregate([
 		{
 			$match: {
@@ -20,6 +23,16 @@ export const load: PageServerLoad = async ({ url }) => {
 						name: {
 							$exists: true
 						}
+					},
+					{
+						departmentCode:
+							selectedDepartments.length > 0
+								? {
+										$in: selectedDepartments
+									}
+								: {
+										$exists: true
+									}
 					},
 					{
 						parent: null
@@ -126,8 +139,33 @@ export const load: PageServerLoad = async ({ url }) => {
 		}
 	]);
 
+	const countedDepartmentCodes = await Course.aggregate([
+		// Count the occurrences of each department code
+		{
+			$group: {
+				_id: '$departmentCode',
+				count: { $sum: 1 }
+			}
+		}
+	]);
+
+	let departments = await Department.find({}).exec();
+
+	// Sort departments by the number of courses they have: the more courses, the
+	// bigger the department, the higher the chance an user from that department
+	// is looking for a course.
+	departments = departments.sort((a, b) => {
+		const aCount = countedDepartmentCodes.find((count) => count._id === a.code)?.count ?? 0;
+		const bCount = countedDepartmentCodes.find((count) => count._id === b.code)?.count ?? 0;
+		return bCount - aCount;
+	});
+
 	return {
 		searchTerm,
+		departments: departments.map((department) =>
+			department.toObject({ flattenObjectIds: true, flattenMaps: true })
+		),
+		selectedDepartments,
 		courses: courses
 			.then(async (dehydratedResults) => {
 				const hydratedCourses = (dehydratedResults[0].results as ICourse[]).map(
