@@ -32,7 +32,7 @@
 	{@render children()}
 	<footer class="[&_a:hover]:no-underline [&_a]:underline [&_a]:underline-offset-4">
 		<p class="mt-4 text-center text-zinc-500/50">
-			Brought to you with &hearts; by <a href="https://deme3.me">Demetrio</a>
+			Brought to you with &hearts; by <a href="https://deme3.me" target="_blank">Demetrio</a>
 		</p>
 		<p class="text-center text-zinc-500/50">
 			<a href="/info">About</a> &middot;
