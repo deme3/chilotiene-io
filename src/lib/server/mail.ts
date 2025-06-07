@@ -6,6 +6,9 @@ import config from '$lib/server/config';
 const resend = new Resend(config.mail.api_key);
 
 export async function sendConfirmationToken(user: IUser, token: IConfirmationToken): Promise<void> {
+	if (import.meta.env.MODE === 'development') {
+		return;
+	} // Skip sending emails in development mode
 	const { data, error } = await resend.emails.send({
 		from: 'Chilotiene <register@auto.chilotiene.io>',
 		to: [user.emailAddress],
@@ -23,6 +26,9 @@ export async function sendConfirmationToken(user: IUser, token: IConfirmationTok
 }
 
 export async function sendWelcomeEmail(user: IUser): Promise<void> {
+	if (import.meta.env.MODE === 'development') {
+		return;
+	} // Skip sending emails in development mode
 	const { data, error } = await resend.emails.send({
 		from: 'Chilotiene <register@auto.chilotiene.io>',
 		to: [user.emailAddress],
