@@ -1,0 +1,15 @@
+name: Deploy
+on: push
+jobs:
+  build:
+    runs-on: [prod, linux]
+    environment: production
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: be sure to exit previous container
+        run: docker compose down
+      - name: deploy container at ${{ vars.CONFIG_ORIGIN }}
+        run: docker compose up --build --detach
+        env:
+          CONFIG_ORIGIN: ${{ vars.CONFIG_ORIGIN }}
