@@ -13,3 +13,4 @@ jobs:
         run: docker compose up --build --detach
         env:
           CONFIG_ORIGIN: ${{ vars.CONFIG_ORIGIN }}
+          MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
