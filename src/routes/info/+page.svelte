@@ -56,54 +56,56 @@
 			</p>
 		</article>
 	</Accordion>
-	<Accordion title="Donazioni" noncollapsible>
-		<article class="prose prose-base prose-invert !max-w-full px-2 prose-headings:mb-0">
-			<p>
-				Per mantenere online questo sito, ovvero coprire i costi del server e del dominio, metto
-				personalmente a disposizione una piccola somma di denaro su base annua. Se vuoi aiutarmi a
-				coprire questi costi, o vuoi esprimere apprezzamento per questo lavoro, puoi fare una
-				donazione tramite PayPal o Ko-fi. Qualsiasi cifra è immensamente apprezzata.
-			</p>
+	{#if false}
+		<Accordion title="Donazioni" noncollapsible>
+			<article class="prose prose-base prose-invert !max-w-full px-2 prose-headings:mb-0">
+				<p>
+					Per mantenere online questo sito, ovvero coprire i costi del server e del dominio, metto
+					personalmente a disposizione una piccola somma di denaro su base annua. Se vuoi aiutarmi a
+					coprire questi costi, o vuoi esprimere apprezzamento per questo lavoro, puoi fare una
+					donazione tramite PayPal o Ko-fi. Qualsiasi cifra è immensamente apprezzata.
+				</p>
 
-			<h4>Quanto?</h4>
-			<p>
-				Quanto vuoi. Qui sotto puoi vedere quanti dei costi del <strong>2025</strong> sono stati coperti
-				dalle donazioni. Aggiorno periodicamente questa pagina manualmente, quindi potresti non vedere
-				la tua donazione immediatamente.
-			</p>
-		</article>
-		<div class="mt-4 flex flex-col gap-2 px-2">
-			<p><strong>0%</strong> (0 su 50€).</p>
-			<div class="h-4 w-full rounded-md bg-zinc-900">
-				<div class="h-full w-0 rounded-l-md bg-white"></div>
+				<h4>Quanto?</h4>
+				<p>
+					Quanto vuoi. Qui sotto puoi vedere quanti dei costi del <strong>2025</strong> sono stati coperti
+					dalle donazioni. Aggiorno periodicamente questa pagina manualmente, quindi potresti non vedere
+					la tua donazione immediatamente.
+				</p>
+			</article>
+			<div class="mt-4 flex flex-col gap-2 px-2">
+				<p><strong>0%</strong> (0 su 50€).</p>
+				<div class="h-4 w-full rounded-md bg-zinc-900">
+					<div class="h-full w-0 rounded-l-md bg-white"></div>
+				</div>
+				<p class="text-xs">
+					Si ringraziano per le donazioni: Carlotta Cisse, Azzurra Baraldi, Sara Malavasi, Matilde
+					Vecchi, Adele Luppi, Gioia Borsari, Diana Barbieri, Amelia Rinaldi, Nicole Montorsi,
+					Ludovica Cavazzuti, Diana Cavazzuti, Miriam Cavazzuti, Miriam Righi, Amelia Ferrari,
+					Matilde Rossi, Giorgia Cisse, Ludovica Neri, Alessia Garuti, Vittoria Leonardi, Marta
+					Sala, Anita Cisse, Beatrice Barbieri, Margherita Rinaldi, Diletta Venturelli, Arianna
+					Martinelli, Greta Barbieri, Camilla Montorsi, Viola Bergamini, Nicole Esposito, Arianna
+					Reggiani, Alessia Morandi, Ambra Righi, Emma Lugli, Gaia Franchini.
+				</p>
 			</div>
-			<p class="text-xs">
-				Si ringraziano per le donazioni: Carlotta Cisse, Azzurra Baraldi, Sara Malavasi, Matilde
-				Vecchi, Adele Luppi, Gioia Borsari, Diana Barbieri, Amelia Rinaldi, Nicole Montorsi,
-				Ludovica Cavazzuti, Diana Cavazzuti, Miriam Cavazzuti, Miriam Righi, Amelia Ferrari, Matilde
-				Rossi, Giorgia Cisse, Ludovica Neri, Alessia Garuti, Vittoria Leonardi, Marta Sala, Anita
-				Cisse, Beatrice Barbieri, Margherita Rinaldi, Diletta Venturelli, Arianna Martinelli, Greta
-				Barbieri, Camilla Montorsi, Viola Bergamini, Nicole Esposito, Arianna Reggiani, Alessia
-				Morandi, Ambra Righi, Emma Lugli, Gaia Franchini.
-			</p>
-		</div>
-	</Accordion>
-	<Accordion title="Roadmap" noncollapsible>
-		<article class="prose prose-base prose-invert !max-w-full px-2 prose-headings:mb-0">
-			<h4>Adesso</h4>
-			<p class="my-0 text-xs [color:var(--tw-prose-captions)]">12 gennaio 2025</p>
-			<p class="mt-2">
-				Il sito viene rilasciato unicamente con la sua funzione primaria di aggregatore di
-				recensioni sui corsi dell'Università.
-			</p>
+		</Accordion>
+		<Accordion title="Roadmap" noncollapsible>
+			<article class="prose prose-base prose-invert !max-w-full px-2 prose-headings:mb-0">
+				<h4>Adesso</h4>
+				<p class="my-0 text-xs [color:var(--tw-prose-captions)]">12 gennaio 2025</p>
+				<p class="mt-2">
+					Il sito viene rilasciato unicamente con la sua funzione primaria di aggregatore di
+					recensioni sui corsi dell'Università.
+				</p>
 
-			<h4>In futuro</h4>
-			<p class="my-0 text-xs [color:var(--tw-prose-captions)]">entro l'anno?</p>
-			<p class="mb-0 mt-2">Le seguenti funzionalità sono in programma per il futuro:</p>
-			<ul class="mt-0 pt-0">
-				<li>Aggiungere vista tabellare compatta</li>
-				<li>Funzione "carrello corsi": salvare corsi per consultarli più tardi</li>
-			</ul>
-		</article>
-	</Accordion>
+				<h4>In futuro</h4>
+				<p class="my-0 text-xs [color:var(--tw-prose-captions)]">entro l'anno?</p>
+				<p class="mb-0 mt-2">Le seguenti funzionalità sono in programma per il futuro:</p>
+				<ul class="mt-0 pt-0">
+					<li>Aggiungere vista tabellare compatta</li>
+					<li>Funzione "carrello corsi": salvare corsi per consultarli più tardi</li>
+				</ul>
+			</article>
+		</Accordion>
+	{/if}
 </section>
