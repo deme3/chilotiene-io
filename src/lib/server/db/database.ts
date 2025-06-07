@@ -14,7 +14,8 @@ try {
 	conn = await mongoose.connect(dbURL);
 } catch (err) {
 	console.error(`Failed to connect to MongoDB: ${dbURLCensored}`);
-	throw err;
+	console.error(err);
+	// throw err;
 }
 
 export default conn;
