@@ -21,8 +21,7 @@ services:
       args:
         - MONGO_HOST_ENV=mongo
         - ORIGIN_ENV=${CONFIG_ORIGIN:-http://localhost:3000}
-    environment:
-      - MAIL_API_KEY=${MAIL_API_KEY:-}
+        - MAIL_API_KEY_ENV=${MAIL_API_KEY:-}
     ports:
       - '3000:3000'
     networks:
