@@ -19,6 +19,19 @@ export const actions = {
 			return error(400, 'Invalid form data');
 		}
 
-		await auth.performLogin(email, password, cookies, request.headers.get('user-agent') ?? '');
+		const result = await auth.performLogin(
+			email,
+			password,
+			cookies,
+			request.headers.get('user-agent') ?? ''
+		);
+
+		if (!result) {
+			return error(401, 'Invalid email or password');
+		}
+
+		return {
+			success: true
+		};
 	}
 };
