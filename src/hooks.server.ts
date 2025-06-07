@@ -55,12 +55,5 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	const response = await resolve(event);
-
-	if (import.meta.env.MODE === 'production') {
-		response.headers.append(
-			'Access-Control-Allow-Origin',
-			`https://www.chilotiene.io, https://chilotiene.io`
-		);
-	}
 	return response;
 };
