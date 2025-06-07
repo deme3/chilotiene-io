@@ -1,7 +1,7 @@
 FROM node:20 AS base
 
 # This will come from Compose
-ARG JWT_SECRET_ENV=""
+# ARG JWT_SECRET_ENV=""
 ARG MONGO_HOST_ENV="mongo"
 ARG ORIGIN_ENV="http://localhost:3000"
 
@@ -73,7 +73,7 @@ RUN rm /app/.env.test || true
 WORKDIR /app
 
 # Web app start
-RUN JWT_SECRET=${JWT_SECRET_ENV} MONGO_HOST=${MONGO_HOST_ENV} node ./configurator.js production
+RUN MONGO_HOST=${MONGO_HOST_ENV} node ./configurator.js production
 RUN NODE_OPTIONS="--max-old-space-size=3072" npm run build
 
 ENV ORIGIN=${ORIGIN_ENV}

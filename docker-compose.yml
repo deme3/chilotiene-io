@@ -18,12 +18,19 @@ services:
       target: production
       args:
         - MONGO_HOST_ENV=mongo
-        - ORIGIN_ENV=http://localhost:3000
+        - ORIGIN_ENV=${CONFIG_ORIGIN:-http://localhost:3000}
     ports:
       - '3000:3000'
+    networks:
+      - chilotiene-network
     restart: always
     depends_on:
       - mongo
 
 volumes:
   chilotiene-mongodata-prod:
+
+networks:
+  chilotiene-network:
+    name: chilotiene-network
+    driver: bridge
