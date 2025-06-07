@@ -8,6 +8,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: chilotiene
     expose:
       - 27017
+    networks:
+      - chilotiene-network
     volumes:
       - chilotiene-mongodata-prod:/data/db
 
