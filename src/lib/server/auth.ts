@@ -112,16 +112,19 @@ export async function performLogin(
 	const user = await User.findOne({ emailAddress });
 
 	if (!user) {
+		console.warn(`Login attempt with non-existing user: ${emailAddress}`);
 		return false;
 	}
 
 	if (!(await bcrypt.compare(password, user.password))) {
+		console.warn(`Login attempt with invalid password for user: ${emailAddress}`);
 		return false;
 	}
 
 	const jwtGenerated = createJwt(user);
 	const jwtData = checkJwtValidity(jwtGenerated)!;
 
+	console.log('Successful login for user:', emailAddress, 'with JWT ID:', jwtData.jti);
 	await Session.createSession(jwtData, userAgent);
 	cookies.set(COOKIE_NAME, jwtGenerated, {
 		maxAge: 60 * 60 * 24 * 7,
@@ -130,6 +133,7 @@ export async function performLogin(
 		secure: import.meta.env.MODE === 'production',
 		httpOnly: true
 	});
+
 	return true;
 }
 
