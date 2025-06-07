@@ -75,7 +75,7 @@ WORKDIR /app
 
 # Web app start
 RUN MONGO_HOST=${MONGO_HOST_ENV} MAIL_API_KEY=${MAIL_API_KEY_ENV} node ./configurator.js production
-RUN NODE_OPTIONS="--max-old-space-size=3072" npm run build
+RUN NODE_OPTIONS="--max-old-space-size=3072" MAIL_API_KEY=${MAIL_API_KEY_ENV} npm run build
 
 ENV ORIGIN=${ORIGIN_ENV}
 CMD BODY_SIZE_LIMIT=4294967296 node --experimental-vm-modules build
