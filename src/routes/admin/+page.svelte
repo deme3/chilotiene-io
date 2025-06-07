@@ -1,6 +1,10 @@
-<script>
+<script lang="ts">
+	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import Accordion from '$lib/components/Accordion.svelte';
+	import type { PageProps } from './$types';
+
+	let { data, form }: PageProps = $props();
 </script>
 
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
@@ -14,6 +18,22 @@
 </div>
 
 <section class="mt-4 flex flex-col gap-4">
+	<Accordion title="Importa" noncollapsible>
+		<h3 class="text-lg font-bold text-white">Importa dati da UniTN</h3>
+		<form class="flex flex-col gap-4" action="?/importFromUniTN" method="POST" use:enhance>
+			<label>
+				<span class="text-sm">Anno di offerta</span>
+				<input name="offerta" type="number" value="2024" class="text-input bg-zinc-900" />
+			</label>
+			<button type="submit" class="generic-button">Aggiungi</button>
+
+			{#if form?.success}
+				<p class="text-sm text-green-500">Importazione completata con successo!</p>
+			{:else if form?.error}
+				<p class="text-sm text-red-500">Errore durante l'importazione: {form.error}</p>
+			{/if}
+		</form>
+	</Accordion>
 	<Accordion title="Pagina donazioni" noncollapsible>
 		<!-- Qui posso aggiungere nuovi nomi al listone, rimuovere quelli esistenti e aggiornare l'importo raggiunto e l'importo massimo-->
 		<h3 class="text-lg font-bold text-white">Aggiungi donatore</h3>
