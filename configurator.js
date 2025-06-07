@@ -9,6 +9,7 @@ ConfigExample.database.port = parseInt(process.env.MONGO_PORT ?? '27017');
 ConfigExample.database.name = process.env.MONGO_DB ?? 'chilotiene?authSource=admin';
 ConfigExample.database.username = process.env.MONGO_USER ?? 'chilotiene';
 ConfigExample.database.password = process.env.MONGO_PASS ?? 'chilotiene';
+ConfigExample.mail = {};
 ConfigExample.mail.api_key = process.env.MAIL_API_KEY ?? 're-resend-api-key';
 
 console.log('Writing configuration to src/lib/db/config.ts...');
