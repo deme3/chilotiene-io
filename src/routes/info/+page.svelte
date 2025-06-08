@@ -1,7 +1,10 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import Accordion from '$lib/components/Accordion.svelte';
+	import type { PageData } from './$types';
+
+	let { data }: { data: PageData } = $props();
 </script>
 
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
@@ -56,39 +59,55 @@
 			</p>
 		</article>
 	</Accordion>
-	{#if false}
+	{#if data.donors && false}
 		<Accordion title="Donazioni" noncollapsible>
 			<article class="prose prose-base prose-invert !max-w-full px-2 prose-headings:mb-0">
 				<p>
 					Per mantenere online questo sito, ovvero coprire i costi del server e del dominio, metto
 					personalmente a disposizione una piccola somma di denaro su base annua. Se vuoi aiutarmi a
 					coprire questi costi, o vuoi esprimere apprezzamento per questo lavoro, puoi fare una
-					donazione tramite PayPal o Ko-fi. Qualsiasi cifra è immensamente apprezzata.
+					donazione tramite Ko-fi. Qualsiasi cifra è immensamente apprezzata.
+				</p>
+
+				<p class="-mt-2">
+					<a href="https://ko-fi.com/T6T6O6P8Z" class="no-external-link" target="_blank"
+						><img
+							height="36"
+							style="height:36px;margin:0;"
+							src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
+							alt="Buy Me a Coffee at ko-fi.com"
+						/></a
+					>
 				</p>
 
 				<h4>Quanto?</h4>
 				<p>
-					Quanto vuoi. Qui sotto puoi vedere quanti dei costi del <strong>2025</strong> sono stati coperti
-					dalle donazioni. Aggiorno periodicamente questa pagina manualmente, quindi potresti non vedere
-					la tua donazione immediatamente.
+					Quanto vuoi. Qui sotto puoi vedere quanti dei costi del <strong
+						>{new Date().getFullYear()}</strong
+					> sono stati coperti dalle donazioni. Aggiorno periodicamente questa pagina manualmente, quindi
+					potresti non vedere la tua donazione immediatamente.
 				</p>
 			</article>
 			<div class="mt-4 flex flex-col gap-2 px-2">
-				<p><strong>0%</strong> (0 su 50€).</p>
+				<p>
+					<strong>{Math.round((data.raised / data.goal) * 100)}%</strong>
+					({data.raised} su {data.goal}€).
+				</p>
 				<div class="h-4 w-full rounded-md bg-zinc-900">
-					<div class="h-full w-0 rounded-l-md bg-white"></div>
+					<div
+						class="h-full rounded-l-md bg-white"
+						style="width: {Math.min((data.raised / data.goal) * 100, 100)}%"
+					></div>
 				</div>
 				<p class="text-xs">
-					Si ringraziano per le donazioni: Carlotta Cisse, Azzurra Baraldi, Sara Malavasi, Matilde
-					Vecchi, Adele Luppi, Gioia Borsari, Diana Barbieri, Amelia Rinaldi, Nicole Montorsi,
-					Ludovica Cavazzuti, Diana Cavazzuti, Miriam Cavazzuti, Miriam Righi, Amelia Ferrari,
-					Matilde Rossi, Giorgia Cisse, Ludovica Neri, Alessia Garuti, Vittoria Leonardi, Marta
-					Sala, Anita Cisse, Beatrice Barbieri, Margherita Rinaldi, Diletta Venturelli, Arianna
-					Martinelli, Greta Barbieri, Camilla Montorsi, Viola Bergamini, Nicole Esposito, Arianna
-					Reggiani, Alessia Morandi, Ambra Righi, Emma Lugli, Gaia Franchini.
+					{data.donors.length > 0
+						? `Si ringraziano per le donazioni: ${data.donors.join(', ')}.`
+						: 'Per adesso nessuna donazione. :('}
 				</p>
 			</div>
 		</Accordion>
+	{/if}
+	{#if false}
 		<Accordion title="Roadmap" noncollapsible>
 			<article class="prose prose-base prose-invert !max-w-full px-2 prose-headings:mb-0">
 				<h4>Adesso</h4>

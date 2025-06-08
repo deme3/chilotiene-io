@@ -8,7 +8,7 @@
 		@apply bg-zinc-900 text-white;
 	}
 
-	.prose a[target="_blank"]::before {
+	.prose a[target="_blank"]:not(.no-external-link)::before {
 		content: "\ea24 ";
 		font-family: 'tabler-icons';
 		@apply text-xs;
