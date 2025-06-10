@@ -219,5 +219,10 @@
 
 		"feedback_placeholder": "Scrivi qui il tuo feedback...",
 		"submit_button": "Invia"
+	},
+	"error": {
+		"404": "Pagina non trovata",
+		"unknown": "Errore sconosciuto",
+		"go_back": "Torna indietro"
 	}
 }

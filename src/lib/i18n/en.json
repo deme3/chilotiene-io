@@ -218,5 +218,10 @@
 		"feedback_label": "Feedback",
 		"feedback_placeholder": "Write your feedback here...",
 		"submit_button": "Submit"
+	},
+	"error": {
+		"404": "Page not found",
+		"unknown": "Unknown error",
+		"go_back": "Go back"
 	}
 }

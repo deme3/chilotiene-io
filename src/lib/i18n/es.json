@@ -218,5 +218,10 @@
 		"feedback_label": "Comentarios",
 		"feedback_placeholder": "Escribe tus comentarios aquí...",
 		"submit_button": "Enviar"
+	},
+	"error": {
+		"404": "Página no encontrada",
+		"unknown": "Error desconocido",
+		"go_back": "Volver"
 	}
 }
