@@ -217,7 +217,7 @@ export interface ICourseModel
 
 type PopulatedCourse = HydratedDocument<
 	Omit<ICourse, 'name' | 'parent' | 'adminHeads' | 'professors'> & {
-		name: Map<string, string>;
+		name: Record<string, string>;
 		department: IDepartment;
 		parent?: HydratedDocument<PopulatedCourse>;
 		adminHeads: IProfessor[];

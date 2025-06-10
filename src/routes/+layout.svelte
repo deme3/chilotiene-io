@@ -1,4 +1,6 @@
 <script lang="ts">
+	import '$lib/i18n'; // Import to initialize
+	import { locale, _ } from 'svelte-i18n';
 	import '../app.css';
 	import { browser } from '$app/environment';
 	import { onNavigate } from '$app/navigation';
@@ -35,10 +37,15 @@
 			Brought to you with &hearts; by <a href="https://deme3.me" target="_blank">Demetrio</a>
 		</p>
 		<p class="text-center text-zinc-500/50">
-			<a href="/info">About</a> &middot;
-			<a href="/feedback">Feedback</a> &middot;
-			<a href="/privacy">Privacy</a>
+			<a href="/info">{$_('footer.about')}</a> &middot;
+			<a href="/feedback">{$_('footer.feedback')}</a> &middot;
+			<a href="/privacy">{$_('footer.privacy')}</a>
 		</p>
+		<div class="flex items-center gap-2">
+			<button onclick={() => locale.set('en')}>EN</button>
+			<button onclick={() => locale.set('es')}>ES</button>
+			<button onclick={() => locale.set('it')}>IT</button>
+		</div>
 	</footer>
 </main>
 

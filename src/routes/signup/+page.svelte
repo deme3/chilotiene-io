@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { enhance } from '$app/forms';
 	import { base } from '$app/paths';
 	import Accordion from '$lib/components/Accordion.svelte';
@@ -11,7 +12,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign up - Chi lo tiene...</title>
+	<title>{$_('signup.title')} - {$_('title')}</title>
 	<style>
 		body,
 		html {
@@ -30,79 +31,70 @@
 
 <section id="login">
 	<section class="max-w-96">
-		<h1 class="text-center text-3xl font-bold"><a href="{base}/">chilotiene.io</a></h1>
+		<h1 class="text-center text-3xl font-bold"><a href="{base}/">{$_('title')}</a></h1>
 		{#if form?.success && form?.user && form?.token}
 			<div class="mt-4 flex flex-col gap-4">
 				<p class="text-center text-4xl">
 					<i class="ti ti-circle-check"></i>
 				</p>
-				<p class="text-justify">
-					You have successfully signed up. Please check your e-mail to confirm your account.
-				</p>
-				<p class="text-justify">
-					Please note you cannot log in until you have confirmed your account. However, you can
-					still access the website as a guest.
-				</p>
+				<p class="text-justify">{$_('signup.success_message')}</p>
+				<p class="text-justify">{$_('signup.cannot_login_message')}</p>
 				{#if form?.resent}
 					<p class="text-justify">
-						The e-mail has been sent again. Please check your inbox and spam folder. If you still
-						did not receive it, please contact us at <a
+						{$_('signup.resent_message')}
+						<a
 							class="underline"
-							href={`mailto:help@chilotiene.io?subject=${encodeURIComponent('Help: Confirmation token went missing')}&body=` +
-								encodeURIComponent(`Hello,
-
-I did not receive the confirmation e-mail twice. Could you please help me?
-The e-mail address I used is ${form?.user?.emailAddress ?? '<error, please add manually>'}. [add any relevant detail that might help]`)}
-							>help@chilotiene.io</a
+							href="mailto:help@chilotiene.io?subject={encodeURIComponent(
+								$_('signup.email_subject')
+							)}&body={encodeURIComponent(
+								$_('signup.email_body', {
+									values: { email: form?.user?.emailAddress ?? '<error, please add manually>' }
+								})
+							)}">help@chilotiene.io</a
 						>.
 					</p>
 				{:else}
 					<div class="text-justify">
-						Did you not receive the e-mail? Please check your spam folder or <form
-							method="post"
-							action="?/resend"
-							class="inline"
-						>
+						{$_('signup.not_received_message')}
+						<form method="post" action="?/resend" class="inline">
 							<input type="hidden" name="email" value={form?.user?.emailAddress} />
 							<input type="hidden" name="token" value={form?.token?.token} />
-							<button class="underline" type="submit">click here</button>
+							<button class="underline" type="submit">{$_('signup.click_here')}</button>
 						</form>
-						to resend it.
+						{$_('signup.to_resend')}
 					</div>
 				{/if}
 			</div>
 		{:else}
-			<h2 class="mb-2 text-center text-sm text-zinc-700">Sign up</h2>
-			<Accordion title="Sign up" noncollapsible>
+			<h2 class="mb-2 text-center text-sm text-zinc-700">{$_('signup.title')}</h2>
+			<Accordion title={$_('signup.title')} noncollapsible>
 				<form action="?/register" class="flex flex-col gap-4" method="POST" use:enhance>
 					<label>
-						<span class="text-sm font-bold">Full name</span>
-						<p class="mb-1 text-xs text-zinc-600">
-							It will not be shared unless you explicitly allow it.
-						</p>
+						<span class="text-sm font-bold">{$_('signup.full_name')}</span>
+						<p class="mb-1 text-xs text-zinc-600">{$_('signup.full_name_description')}</p>
 						<input
 							type="text"
 							name="fullName"
 							class="text-input bg-zinc-900"
-							placeholder="Mario Rossi"
+							placeholder={$_('signup.full_name_placeholder')}
 							required
 						/>
 					</label>
 					<label>
-						<span class="text-sm font-bold">E-mail address</span>
+						<span class="text-sm font-bold">{$_('signup.email_address')}</span>
 						<p class="mb-1 text-xs text-zinc-600">
-							Please provide your institutional e-mail address.
+							{$_('signup.email_address_description')}
 						</p>
 						<input
 							type="text"
 							name="email"
 							class="text-input bg-zinc-900"
-							placeholder="mario.rossi@unitn.it"
+							placeholder={$_('signup.email_address_placeholder')}
 							required
 						/>
 					</label>
 					<label>
-						<span class="text-sm font-bold">Password</span>
+						<span class="text-sm font-bold">{$_('signup.password')}</span>
 						<input
 							type="password"
 							name="password"
@@ -112,7 +104,7 @@ The e-mail address I used is ${form?.user?.emailAddress ?? '<error, please add m
 						/>
 					</label>
 					<label>
-						<span class="text-sm font-bold">Confirm Password</span>
+						<span class="text-sm font-bold">{$_('signup.confirm_password')}</span>
 						<input
 							type="password"
 							name="confirmpassword"
@@ -124,16 +116,16 @@ The e-mail address I used is ${form?.user?.emailAddress ?? '<error, please add m
 					<label>
 						<input type="checkbox" name="privacy" required />
 						<span class="text-sm"
-							>I have read and I accept the <a href="/privacy" class="underline">Privacy Policy</a
+							>{$_('signup.privacy_policy_agreement_1')}
+							<a href="/privacy" class="underline">{$_('signup.privacy_policy_agreement_2')}</a
 							>.</span
 						>
 						<p class="text-xs text-zinc-600">
-							Your data is never used for marketing or profiling activities. It will only be shared
-							with service providers for the purpose of providing the service.
+							{$_('signup.privacy_policy_description')}
 						</p>
 					</label>
 					<button type="submit" class="generic-button" disabled={confirmPassword !== password}
-						>Sign up</button
+						>{$_('signup.title')}</button
 					>
 				</form>
 			</Accordion>

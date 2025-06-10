@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
@@ -70,25 +71,29 @@
 </script>
 
 <svelte:head>
-	<title>{data.course.name['it']} - Chi lo tiene...</title>
+	<title>{data.course.name['it']} - {$_('title')}</title>
 	<meta
 		name="description"
-		content="Student reviews on UniTrento course: {data.course.name[
-			'it'
-		]} by Prof(s). {uniqueProfessors
-			.map((prof) => prof.fullName)
-			.join(', ')}. Offered by department: {data.course.department.name['it']}"
+		content={$_('course.meta_description', {
+			values: {
+				course_name: data.course.name['it'],
+				professors: uniqueProfessors.map((prof) => prof.fullName).join(', '),
+				department: data.course.department.name['it']
+			}
+		})}
 	/>
-	<meta property="og:title" content="{data.course.name['it']} - Chi lo tiene..." />
+	<meta property="og:title" content="{data.course.name['it']} - {$_('title')}" />
 	<meta
 		property="og:description"
-		content="Student reviews on UniTrento course: {data.course.name[
-			'it'
-		]} by Prof(s). {uniqueProfessors
-			.map((prof) => prof.fullName)
-			.join(', ')}. Offered by department: {data.course.department.name['it']}"
+		content={$_('course.meta_description', {
+			values: {
+				course_name: data.course.name['it'],
+				professors: uniqueProfessors.map((prof) => prof.fullName).join(', '),
+				department: data.course.department.name['it']
+			}
+		})}
 	/>
-	<meta property="og:site_name" content="Chi lo tiene..." />
+	<meta property="og:site_name" content={$_('title')} />
 	<meta property="og:url" content="{page.url.origin}{base}/courses/{data.course.id}" />
 	<meta property="og:type" content="article" />
 	{#each uniqueProfessors as professor}
@@ -108,42 +113,46 @@
 
 <div id="page-header" class="flex min-h-16 flex-row items-center justify-between gap-4">
 	<div>
-		<h1 class="small-logo font-bold text-zinc-200/50" id="logo">Chi lo tiene...</h1>
+		<h1 class="small-logo font-bold text-zinc-200/50" id="logo">{$_('title')}</h1>
 		<h2 class="text-xl font-bold"><strong>{data.course.name['it']}</strong></h2>
 		<h3 class="text-md text-zinc-500">
 			{#each bothProfessorAndHead as professor, i}
-				<i class="ti ti-user" title="Docente e titolare"
-				></i>{' '}{professor.fullName}{#if i < bothProfessorAndHead.length - 1},{' '}
+				<i class="ti ti-user" title={$_('course.professor_and_head')}></i>
+				{' '}{professor.fullName}{#if i < bothProfessorAndHead.length - 1},{' '}
 				{/if}
-			{/each}{#if bothProfessorAndHead.length > 0 && (uniqueProfessors.length > 0 || uniqueAdminHeads.length > 0)}
+			{/each}
+			{#if bothProfessorAndHead.length > 0 && (uniqueProfessors.length > 0 || uniqueAdminHeads.length > 0)}
 				,{' '}
 			{/if}
 			{#each uniqueProfessors as professor, i}
-				<i class="ti ti-school" title="Docente"
-				></i>{' '}{professor.fullName}{#if i < uniqueProfessors.length - 1},{' '}
+				<i class="ti ti-school" title={$_('course.professor')}></i>
+				{' '}{professor.fullName}{#if i < uniqueProfessors.length - 1},{' '}
 				{/if}
-			{/each}{#if uniqueProfessors.length > 0 && uniqueAdminHeads.length > 0}
+			{/each}
+			{#if uniqueProfessors.length > 0 && uniqueAdminHeads.length > 0}
 				,{' '}
 			{/if}
 			{#each uniqueAdminHeads as adminHead, i}
-				<i class="ti ti-sitemap" title="Titolare"
-				></i>{' '}{adminHead.fullName}{#if i < uniqueAdminHeads.length - 1},{' '}
+				<i class="ti ti-sitemap" title={$_('course.head')}></i>
+				{' '}{adminHead.fullName}{#if i < uniqueAdminHeads.length - 1},{' '}
 				{/if}
 			{/each}
 			{#if bothProfessorAndHead.length == 0 && uniqueProfessors.length == 0 && uniqueAdminHeads.length == 0}
-				<span
-					class="cursor-help underline decoration-dotted"
-					title="Non risulta un titolare per questo corso"
-					><i class="ti ti-user-question"></i> Nessuno?</span
+				<span class="cursor-help underline decoration-dotted" title={$_('course.no_head_found')}
+					><i class="ti ti-user-question"></i> {$_('course.nobody')}</span
 				>
 			{/if}
 		</h3>
 	</div>
 	<div class="flex items-center justify-end gap-4">
-		<button class="circular-button" aria-label="Go Home" onclick={() => goto(`${base}/`)}>
+		<button
+			class="circular-button"
+			aria-label={$_('info.go_home')}
+			onclick={() => goto(`${base}/`)}
+		>
 			<i class="ti ti-home"></i>
 		</button>
-		<button class="circular-button" aria-label="Go Back" onclick={() => history.back()}>
+		<button class="circular-button" aria-label={$_('info.go_back')} onclick={() => history.back()}>
 			<i class="ti ti-arrow-left"></i>
 		</button>
 	</div>
@@ -155,7 +164,7 @@
 	{#if data.course.parent}
 		{#await data.course.parent then parent}
 			<div>
-				<h3 class="text-lg font-bold">Insegnamento principale</h3>
+				<h3 class="text-lg font-bold">{$_('course.main_course')}</h3>
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<CourseCard
 						id={parent.id}
@@ -177,7 +186,7 @@
 
 	{#if data.children.length > 0}
 		<div>
-			<h3 class="text-lg font-bold">Unità didattiche</h3>
+			<h3 class="text-lg font-bold">{$_('course.didactic_units')}</h3>
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 				{#each data.children as child}
 					<CourseCard
@@ -199,36 +208,39 @@
 	{/if}
 
 	{#if ChapterScope.TeachingObjectives in data.course.chapters && 'it' in data.course.chapters[ChapterScope.TeachingObjectives] && data.course.chapters[ChapterScope.TeachingObjectives].it.trim().length > 0}
-		<Accordion title="Obiettivi formativi">
+		<Accordion title={$_('course.teaching_objectives')}>
 			<p>{data.course.chapters[ChapterScope.TeachingObjectives].it}</p>
 		</Accordion>
 	{/if}
 	{#if ChapterScope.Prerequisites in data.course.chapters && 'it' in data.course.chapters[ChapterScope.Prerequisites] && data.course.chapters[ChapterScope.Prerequisites].it.trim().length > 0}
-		<Accordion title="Prerequisiti">
+		<Accordion title={$_('course.prerequisites')}>
 			<p>{data.course.chapters[ChapterScope.Prerequisites].it}</p>
 		</Accordion>
 	{/if}
 	{#if ChapterScope.Scope in data.course.chapters && 'it' in data.course.chapters[ChapterScope.Scope] && data.course.chapters[ChapterScope.Scope].it.trim().length > 0}
-		<Accordion title="Contenuti del corso">
+		<Accordion title={$_('course.course_contents')}>
 			<p>{data.course.chapters[ChapterScope.Scope].it}</p>
 		</Accordion>
 	{/if}
 	{#if ChapterScope.TeachingMethods in data.course.chapters && 'it' in data.course.chapters[ChapterScope.TeachingMethods] && data.course.chapters[ChapterScope.TeachingMethods].it.trim().length > 0}
-		<Accordion title="Metodi didattici">
+		<Accordion title={$_('course.teaching_methods')}>
 			<p>{data.course.chapters[ChapterScope.TeachingMethods].it}</p>
 		</Accordion>
 	{/if}
 	{#if ChapterScope.ExaminationMethods in data.course.chapters && 'it' in data.course.chapters[ChapterScope.ExaminationMethods] && data.course.chapters[ChapterScope.ExaminationMethods].it.trim().length > 0}
-		<Accordion title="Modalità d'esame">
+		<Accordion title={$_('course.examination_methods')}>
 			<p>{data.course.chapters[ChapterScope.ExaminationMethods].it}</p>
 		</Accordion>
 	{/if}
 	{#if ChapterScope.Bibliography in data.course.chapters && 'it' in data.course.chapters[ChapterScope.Bibliography] && data.course.chapters[ChapterScope.Bibliography].it.trim().length > 0}
-		<Accordion title="Testi consigliati">
+		<Accordion title={$_('course.recommended_texts')}>
 			<p>{data.course.chapters[ChapterScope.Bibliography].it}</p>
 		</Accordion>
 	{/if}
-	<Accordion title="Recensioni ({overallReviews.length})" noncollapsible>
+	<Accordion
+		title={$_('course.reviews', { values: { count: overallReviews.length } })}
+		noncollapsible
+	>
 		{#snippet right()}
 			{#each Array.from({ length: Math.floor(rating) }, (_, i) => i)}
 				<i class="ti ti-star-filled text-yellow-400"></i>{' '}

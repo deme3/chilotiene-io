@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { _ } from 'svelte-i18n';
 	import { goto } from '$app/navigation';
 	import { fly } from 'svelte/transition';
 
@@ -73,7 +74,7 @@
 			<div class="font-mono text-xs text-zinc-300/75">{code}</div>
 			<h3 class="text-xl font-bold">
 				{name}
-				<span class="text-xs text-zinc-300/75">{credits} CFU</span>
+				<span class="text-xs text-zinc-300/75">{credits} {$_('coursecard.cfu')}</span>
 			</h3>
 			<p class="mb-2 text-xs text-zinc-300/75">{departmentName}</p>
 			<p class="mb-2 text-sm text-zinc-300/75">
@@ -82,16 +83,16 @@
 			{#if bothProfessorAndHead.length + uniqueProfessors.length + uniqueAdminHeads.length > 0}
 				<div class="text-sm">
 					{#each bothProfessorAndHead as professor, i}
-						<i class="ti ti-user" title="Docente e titolare"></i>{' '}
+						<i class="ti ti-user" title={$_('coursecard.professor_and_head')}></i>{' '}
 						{professor}{#if i < bothProfessorAndHead.length - 1},{' '}{/if}
 					{/each}{#if bothProfessorAndHead.length > 0 && (uniqueProfessors.length > 0 || uniqueAdminHeads.length > 0)},{' '}
 					{/if}
 					{#each uniqueProfessors as professor, i}
-						<i class="ti ti-school" title="Docente"></i>{' '}
+						<i class="ti ti-school" title={$_('coursecard.professor')}></i>{' '}
 						{professor}{#if i < uniqueProfessors.length - 1},{' '}{/if}
 					{/each}
 					{#each uniqueAdminHeads as adminHead, i}
-						<i class="ti ti-crown" title="Titolare"></i>{' '}
+						<i class="ti ti-crown" title={$_('coursecard.head')}></i>{' '}
 						{adminHead}{#if i < uniqueAdminHeads.length - 1},{' '}{/if}
 					{/each}
 				</div>
@@ -106,7 +107,9 @@
 				{#each Array.from({ length: 5 - Math.floor(rating) - (rating - Math.floor(rating) >= 0.5 ? 1 : 0) }, (_, i) => i)}
 					<i class="ti ti-star text-yellow-400"></i>{' '}
 				{/each}
-				<span class="ml-1 text-yellow-300/75">{rating == 0 ? 'ND' : rating.toFixed(1)}</span>
+				<span class="ml-1 text-yellow-300/75"
+					>{rating == 0 ? $_('coursecard.nd') : rating.toFixed(1)}</span
+				>
 				<span class="mx-1"> &bullet; </span>
 				{#each Array.from({ length: Math.floor(avgWorkload) }, (_, i) => i)}
 					<i class="ti ti-shield-filled text-red-500/75"></i>{' '}
@@ -118,13 +121,15 @@
 				{#each Array.from({ length: 5 - Math.floor(avgWorkload) - (avgWorkload - Math.floor(avgWorkload) >= 0.5 ? 1 : 0) }, (_, i) => i)}
 					<i class="ti ti-shield text-red-500/75"></i>{' '}
 				{/each}
-				<span class="ml-1 text-red-500/75">{avgWorkload == 0 ? 'ND' : avgWorkload.toFixed(1)}</span>
+				<span class="ml-1 text-red-500/75"
+					>{avgWorkload == 0 ? $_('coursecard.nd') : avgWorkload.toFixed(1)}</span
+				>
 				<span class="mx-1"> &bullet; </span>
 				<i class="ti ti-medal text-green-500/75"></i>{' '}
 				{#if avgGrade > 0}
 					<span class="ml-1 text-green-500/75">{avgGrade.toFixed(1)}</span>
 				{:else}
-					<span class="text-green-500/75">ND</span>
+					<span class="text-green-500/75">{$_('coursecard.nd')}</span>
 				{/if}
 			</div>
 		</div>
