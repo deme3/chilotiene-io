@@ -54,7 +54,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
 			{ $project: { _id: 1 } }
 		]).exec()) as ICourseDoc[];
 
-		if (course) targetId = course[0]._id.toString();
+		if (course && course[0]) targetId = course[0]._id.toString();
 		else error(404, 'Course not found');
 	}
 
