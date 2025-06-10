@@ -111,44 +111,66 @@
 	/>
 </form>
 
-<section class="mt-2 flex items-start gap-2 overflow-x-auto pb-4">
-	{#each data.selectedDepartments.map((x) => data.departments.find((y) => y.code === x)!) as department}
-		<button
-			class="generic-button zinc flex items-center gap-2 whitespace-nowrap px-3 text-sm"
-			aria-label={$_('home.remove_filter', {
-				values: {
-					department: department.name['it']
-				}
-			})}
-			onclick={() => removeDepartment(department.code)}
-		>
-			{department.name['it']} <i class="ti ti-x"></i>
-		</button>
-	{/each}
-</section>
+{#if data.selectedDepartments.length > 0}
+	<section class="mt-2 flex items-start gap-2 overflow-x-auto pb-4">
+		{#await data.streamed.departments}
+			{#each Array.from({ length: data.selectedDepartments.length }, (_, i) => i) as i}
+				<div class="generic-button zinc whitespace-nowrap px-3 text-sm">
+					<div
+						class="h-4 animate-pulse rounded-md bg-zinc-600"
+						class:w-48={i % 2 === 0}
+						class:w-96={i % 2 === 1}
+					></div>
+				</div>
+			{/each}
+		{:then departments}
+			{#each data.selectedDepartments.map((x) => departments.find((y) => y.code === x)!) as department (department.code)}
+				<button
+					class="generic-button zinc flex items-center gap-2 whitespace-nowrap px-3 text-sm"
+					aria-label={$_('home.remove_filter', {
+						values: {
+							department: department.name['it']
+						}
+					})}
+					onclick={() => removeDepartment(department.code)}
+				>
+					{department.name['it']} <i class="ti ti-x"></i>
+				</button>
+			{/each}
+		{/await}
+	</section>
+{/if}
 
 <section class="mt-2 flex flex-col gap-1">
 	<div class="ml-1 text-xs text-zinc-400">{$_('home.filter_by_department')}</div>
 	<div class="flex items-start gap-2 overflow-x-auto pb-4">
-		{#each data.departments.filter((dep) => dep.code !== '0' && !data.selectedDepartments.includes(dep.code)) as department}
-			<button
-				class="generic-button zinc whitespace-nowrap rounded-full text-sm"
-				aria-label={$_('home.filter_by_department_for', {
-					values: {
-						department: department.name['it']
-					}
-				})}
-				onclick={() => gotoDepartment(department.code)}
-			>
-				{department.name['it']}
-			</button>
-		{/each}
+		{#await data.streamed.departments}
+			{#each Array.from({ length: 6 }, (_, i) => i) as _}
+				<div class="generic-button zinc whitespace-nowrap rounded-full text-sm">
+					<div class="skeleton-text h-4 w-16"></div>
+				</div>
+			{/each}
+		{:then departments}
+			{#each departments.filter((dep) => dep.code !== '0' && !data.selectedDepartments.includes(dep.code)) as department}
+				<button
+					class="generic-button zinc whitespace-nowrap rounded-full text-sm"
+					aria-label={$_('home.filter_by_department_for', {
+						values: {
+							department: department.name['it']
+						}
+					})}
+					onclick={() => gotoDepartment(department.code)}
+				>
+					{department.name['it']}
+				</button>
+			{/each}
+		{/await}
 	</div>
 </section>
 
 <section class="mt-4">
 	<div class="grid gap-4 lg:grid-cols-2">
-		{#await data.courses}
+		{#await data.streamed.courses}
 			{#each Array.from({ length: 6 }, (_, i) => i) as _}
 				<CourseCardSkeleton />
 			{/each}
@@ -173,7 +195,7 @@
 		{/await}
 	</div>
 	<div class="mt-4 flex items-center justify-center gap-2">
-		{#await data.pages then pages}
+		{#await data.streamed.pages then pages}
 			<a
 				class="generic-button zinc square"
 				aria-label={$_('home.first_page')}

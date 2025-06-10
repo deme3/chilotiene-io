@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ url }) => {
 
 	const selectedDepartments = url.searchParams.getAll('department');
 
-	const courses = Course.aggregate([
+	const coursesPromise = Course.aggregate([
 		{
 			$match: {
 				$and: [
@@ -139,60 +139,70 @@ export const load: PageServerLoad = async ({ url }) => {
 		}
 	]);
 
-	const countedDepartmentCodes = await Course.aggregate([
-		// Count the occurrences of each department code
-		{
-			$group: {
-				_id: '$departmentCode',
-				count: { $sum: 1 }
-			}
+	const getProcessedCourses = async () => {
+		const dehydratedResults = await coursesPromise;
+		const results = dehydratedResults[0]?.results ?? [];
+		const hydratedCourses = (results as ICourse[]).map((dehydratedCourse) =>
+			Course.hydrate.bind(Course)(dehydratedCourse)
+		);
+
+		const populatedCourses = [];
+		for (const course of hydratedCourses) {
+			populatedCourses.push(await course.populateCourse());
 		}
-	]);
 
-	let departments = await Department.find({}).exec();
+		return Promise.all(
+			populatedCourses.map(async (course) => ({
+				...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
+				id: course.id,
+				reviews: await course.getRatings(),
+				workload: await course.getWorkloads(),
+				grades: await course.getGrades()
+			}))
+		);
+	};
 
-	// Sort departments by the number of courses they have: the more courses, the
-	// bigger the department, the higher the chance an user from that department
-	// is looking for a course.
-	departments = departments.sort((a, b) => {
-		const aCount = countedDepartmentCodes.find((count) => count._id === a.code)?.count ?? 0;
-		const bCount = countedDepartmentCodes.find((count) => count._id === b.code)?.count ?? 0;
-		return bCount - aCount;
-	});
+	const getPagesCount = async () => {
+		const dehydratedResults = await coursesPromise;
+		const total = dehydratedResults[0]?.metadata[0]?.total ?? 0;
+		return 1 + Math.floor(total / 30);
+	};
+
+	const getProcessedDepartments = async () => {
+		const countedDepartmentCodes = await Course.aggregate([
+			// Count the occurrences of each department code
+			{
+				$group: {
+					_id: '$departmentCode',
+					count: { $sum: 1 }
+				}
+			}
+		]);
+
+		let departments = await Department.find({}).exec();
+
+		// Sort departments by the number of courses they have: the more courses, the
+		// bigger the department, the higher the chance an user from that department
+		// is looking for a course.
+		departments = departments.sort((a, b) => {
+			const aCount = countedDepartmentCodes.find((count) => count._id === a.code)?.count ?? 0;
+			const bCount = countedDepartmentCodes.find((count) => count._id === b.code)?.count ?? 0;
+			return bCount - aCount;
+		});
+
+		return departments.map((department) =>
+			department.toObject({ flattenObjectIds: true, flattenMaps: true })
+		);
+	};
 
 	return {
 		searchTerm,
-		departments: departments.map((department) =>
-			department.toObject({ flattenObjectIds: true, flattenMaps: true })
-		),
 		selectedDepartments,
-		courses: courses
-			.then(async (dehydratedResults) => {
-				const hydratedCourses = (dehydratedResults[0].results as ICourse[]).map(
-					(dehydratedCourse) => Course.hydrate.bind(Course)(dehydratedCourse)
-				);
-
-				const populatedCourses = [];
-				for (const course of hydratedCourses) {
-					populatedCourses.push(await course.populateCourse());
-				}
-
-				return populatedCourses;
-			})
-			.then((hydratedResults) =>
-				Promise.all(
-					hydratedResults.map(async (course) => ({
-						...course.toObject({ flattenMaps: true, flattenObjectIds: true, virtuals: true }),
-						id: course.id,
-						reviews: await course.getRatings(),
-						workload: await course.getWorkloads(),
-						grades: await course.getGrades()
-					}))
-				)
-			),
 		currentPage: pageNumber,
-		pages: courses.then(
-			(dehydratedResults) => 1 + Math.floor((dehydratedResults[0].metadata[0]?.total ?? 0) / 30)
-		)
+		streamed: {
+			courses: getProcessedCourses(),
+			pages: getPagesCount(),
+			departments: getProcessedDepartments()
+		}
 	};
 };
