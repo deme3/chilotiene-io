@@ -20,6 +20,7 @@
 
 	// Remove preload class
 	if (browser) {
+		locale.set(window.navigator.language);
 		setTimeout(() => {
 			document.querySelector('.preload')?.classList.remove('preload');
 		}, 1000);

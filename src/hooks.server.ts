@@ -4,10 +4,15 @@ import * as auth from '$lib/server/auth';
 import '$lib/server/db/database';
 import { base } from '$app/paths';
 import { UserRole } from '$lib/UserRole';
+import { locale } from 'svelte-i18n';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// You can add custom logic here, for example, authentication or logging
 	console.log(`Request for ${event.url.pathname}`);
+	const lang = event.request.headers.get('accept-language')?.split(',')[0];
+	if (lang) {
+		locale.set(lang);
+	}
 
 	const jwtCookie = event.cookies.get(auth.COOKIE_NAME);
 	let isLoggedIn = false;
