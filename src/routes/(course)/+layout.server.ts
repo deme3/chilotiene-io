@@ -15,33 +15,23 @@ export const load: LayoutServerLoad = async ({ params }) => {
     */
 		targetId = params.seoid;
 
-		// const course = await Course.findOne({
-		// 	$or: [
-		// 		{
-		// 			librettoCode: targetId.split('-')[0],
-		// 			parent: null
-		// 		},
-		// 		{
-		// 			code: targetId.split('-')[0],
-		// 			librettoCode: targetId.split('-')[0].split('/')[0],
-		// 			parent: { $ne: null }
-		// 		}
-		// 	]
-		// })
-		// 	.select('id')
-		// 	.exec();
+		// SOI courses have "SOI-" preprended to the ID, so we consider that format
+		// instead
+		const soiSafeId = targetId.startsWith('SOI')
+			? targetId.split('-', 2).join('-')
+			: targetId.split('-')[0];
 
 		const course = (await Course.aggregate([
 			{
 				$match: {
 					$or: [
 						{
-							librettoCode: targetId.split('-')[0],
+							librettoCode: soiSafeId,
 							parent: null
 						},
 						{
-							code: targetId.split('-')[0],
-							librettoCode: targetId.split('-')[0].split('/')[0],
+							code: soiSafeId,
+							librettoCode: soiSafeId.split('/')[0],
 							parent: { $ne: null }
 						}
 					]
