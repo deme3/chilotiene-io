@@ -77,7 +77,13 @@
 		"reached": "Reached",
 		"new_goal": "New goal",
 		"update_goal": "Update goal",
-		"goal_updated_success": "Goal updated successfully!"
+		"goal_updated_success": "Goal updated successfully!",
+		"import_reviews_title": "Import Reviews",
+		"import_reviews_from_json": "Import reviews from JSON file",
+		"json_file": "JSON file",
+		"import": "Import",
+		"import_reviews_success": "Reviews imported successfully!",
+		"import_reviews_error": "Error during review import:"
 	},
 	"course": {
 		"meta_description": "Student reviews on UniTrento course: {course_name} by Prof(s). {professors}. Offered by department: {department}",

@@ -7,6 +7,7 @@ import './Professor';
 import type { CourseData } from '$lib/server/models/CoursesList';
 import type { IDepartment } from './Department';
 import Department from './Department';
+import type { ImportedReviewerCourseEntry } from '$lib/server/models/ImportedReviewBatch';
 
 type FractionalRating = 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5;
 type Grade = 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 30 | 31;
@@ -213,6 +214,8 @@ export interface ICourseModel
 			ICourseMethods
 		>
 	>;
+
+	importReviewFromAggregator(entry: ImportedReviewerCourseEntry): Promise<void>;
 }
 
 type PopulatedCourse = HydratedDocument<
@@ -671,6 +674,73 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 
 	return newDoc;
 });
+
+CourseSchema.static(
+	'importReviewFromAggregator',
+	async function (entry: ImportedReviewerCourseEntry): Promise<void> {
+		const course = await this.findOne({
+			librettoCode: entry.exam.examCodePk.split('-')[0]
+		});
+
+		if (!course) {
+			console.log(`Review import: Course not found for exam ${entry.exam.examCodePk}, skipping...`);
+			return;
+		}
+
+		const ratingsWithText: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+		for (const review of entry.reviews) {
+			if (!Object.keys(ratingsWithText).includes(review.ratingValue.toString())) {
+				console.log(
+					`Review import: Rating value ${review.ratingValue} out of bounds for course ${course.librettoCode}, skipping...`
+				);
+				continue;
+			}
+			ratingsWithText[review.ratingValue]++;
+		}
+
+		// Each of "votedX" is the total number of votes for that rating both with
+		// and without a review entry in .reviews. So we need to subtract the number
+		// of votes with text from the total number of votes.
+		const ratingsWithoutText = { ...ratingsWithText };
+		ratingsWithoutText[1] = entry.ratingSummary.voted1 - ratingsWithText[1];
+		ratingsWithoutText[2] = entry.ratingSummary.voted2 - ratingsWithText[2];
+		ratingsWithoutText[3] = entry.ratingSummary.voted3 - ratingsWithText[3];
+		ratingsWithoutText[4] = entry.ratingSummary.voted4 - ratingsWithText[4];
+		ratingsWithoutText[5] = entry.ratingSummary.voted5 - ratingsWithText[5];
+
+		for (const [rating, count] of Object.entries(ratingsWithoutText)) {
+			for (let i = 0; i < count; i++) {
+				course.reviews.push({
+					course: course._id,
+					quality: rating,
+					workload: 0,
+					anonymous: true,
+					anonymousVerified: false,
+					imported: true,
+					text: 'This review has been imported from a source that did not provide a text.'
+				});
+			}
+		}
+
+		for (const review of entry.reviews) {
+			if (review.reviewText) {
+				course.reviews.push({
+					course: course._id,
+					quality: review.ratingValue,
+					workload: 0,
+					anonymous: false,
+					anonymousVerified: false,
+					imported: true,
+					text: review.reviewText,
+					createdAt: new Date(review.ratingDate)
+				});
+			}
+		}
+
+		await course.save();
+	}
+);
 
 // Create the Session model
 let Course: ICourseModel;

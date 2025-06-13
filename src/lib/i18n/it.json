@@ -77,7 +77,12 @@
 		"reached": "Raggiunto",
 		"new_goal": "Nuovo obiettivo",
 		"update_goal": "Aggiorna obiettivo",
-		"goal_updated_success": "Obiettivo aggiornato con successo!"
+		"goal_updated_success": "Obiettivo aggiornato con successo!",
+		"import_reviews_title": "Importa recensioni",
+		"import_reviews_from_json": "Importa recensioni da file JSON",
+		"json_file": "File JSON",
+		"import_reviews_success": "Recensioni importate con successo!",
+		"import_reviews_error": "Errore durante l'importazione delle recensioni:"
 	},
 	"course": {
 		"meta_description": "Recensioni degli studenti sul corso UniTrento: {course_name} del Prof. {professors}. Offerto dal dipartimento: {department}",

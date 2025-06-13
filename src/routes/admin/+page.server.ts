@@ -5,6 +5,7 @@ import type { CourseData } from '$lib/server/models/CoursesList';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import type { Types } from 'mongoose';
+import type { ImportedReviewBatch } from '$lib/server/models/ImportedReviewBatch';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const parentData = await parent();
@@ -147,6 +148,35 @@ export const actions = {
 		} catch (err) {
 			console.error(err);
 			return fail(500, { error: 'Failed to update goal', action: url.search });
+		}
+	},
+
+	importReviewBatch: async ({ request, locals, url }) => {
+		const { user } = locals;
+		if (!user || user.user.role !== 'admin') {
+			return error(403, 'You do not have permission to perform this action');
+		}
+
+		const formData = await request.formData();
+		const file = formData.get('reviewBatch');
+		if (!file || !(file instanceof File)) {
+			return fail(400, { error: 'No file uploaded', action: url.search });
+		}
+
+		try {
+			const text = await file.text();
+			const batch: ImportedReviewBatch = JSON.parse(text);
+			if (!batch.exams || !Array.isArray(batch.exams)) {
+				return fail(400, { error: 'Invalid file format', action: url.search });
+			}
+
+			for (const entry of batch.exams) {
+				await Course.importReviewFromAggregator(entry);
+			}
+			return { success: true, action: url.search };
+		} catch (err) {
+			console.error('Error importing review batch:', err);
+			return fail(500, { error: 'Failed to import review batch', action: url.search });
 		}
 	}
 } satisfies Actions;

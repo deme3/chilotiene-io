@@ -97,4 +97,35 @@
 			{/if}
 		</form></Accordion
 	>
+	<Accordion title={$_('admin.import_reviews_title')} noncollapsible>
+		<h3 class="text-lg font-bold text-white">{$_('admin.import_reviews_from_json')}</h3>
+		<form
+			class="flex flex-col gap-4"
+			action="?/importReviewBatch"
+			method="POST"
+			enctype="multipart/form-data"
+			use:enhance
+		>
+			<label>
+				<span class="text-sm">{$_('admin.json_file')}</span>
+				<input
+					name="reviewBatch"
+					type="file"
+					accept="application/json"
+					class="text-input bg-zinc-900"
+					required
+				/>
+			</label>
+			<button type="submit" class="generic-button">{$_('admin.import')}</button>
+
+			{#if form?.success && form.action.includes('importReviewBatch')}
+				<p class="text-sm text-green-500">{$_('admin.import_reviews_success')}</p>
+			{:else if form?.error && form.action.includes('importReviewBatch')}
+				<p class="text-sm text-red-500">
+					{$_('admin.import_reviews_error')}
+					{form.error}
+				</p>
+			{/if}
+		</form>
+	</Accordion>
 </section>
