@@ -15,10 +15,7 @@
 
 	let { data, children }: LayoutProps = $props();
 
-	let overallReviews = $derived([
-		...data.course.reviews,
-		...data.children.flatMap((x) => x.reviews)
-	]);
+	let overallReviews = $derived(data.allReviews);
 
 	let bothProfessorAndHead = $derived(
 		data.course.professors.filter((professor) =>
@@ -56,8 +53,8 @@
 			: 0
 	);
 	let avgWorkload = $derived(
-		data.course.workload.length > 0
-			? data.course.workload.reduce((acc, w) => acc + w, 0) / data.course.workload.length
+		overallReviews.length > 0
+			? overallReviews.reduce((acc, review) => acc + review.workload, 0) / overallReviews.length
 			: 0
 	);
 	let avgGrade = $derived(
@@ -157,6 +154,20 @@
 		</button>
 	</div>
 </div>
+
+{#if data.cohorts.length > 1}
+	<div class="mt-2 flex gap-2">
+		{#each data.cohorts as c}
+			<a
+				href={`${base}/${c.slug}`}
+				class="rounded-md border border-zinc-700 px-3 py-1 text-sm hover:bg-zinc-800"
+				class:bg-zinc-800={c.id === data.course.id}
+			>
+				{c.coorte}
+			</a>
+		{/each}
+	</div>
+{/if}
 
 {@render children()}
 
@@ -385,7 +396,7 @@
 			</div>
 		</form>
 		<div class="mt-3 grid gap-3">
-			{#each overallReviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as review}
+			{#each data.allReviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()) as review}
 				<ReviewCard
 					author={review.authorName}
 					authorId={review.authorId?.toString()}
@@ -396,6 +407,7 @@
 					grade={review.grade}
 					sourced={review.imported}
 					anonymousVerified={review.anonymousVerified}
+					cohort={review.cohort}
 				/>
 			{/each}
 		</div>

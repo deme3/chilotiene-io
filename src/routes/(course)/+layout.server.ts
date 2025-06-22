@@ -57,6 +57,21 @@ export const load: LayoutServerLoad = async ({ params }) => {
 		Promise.all(courses.map((course) => course.populateCourse()))
 	);
 
+	const cohorts = course
+		? await Course.find({
+				librettoCode: course.librettoCode,
+				degreeTrackCode: course.degreeTrackCode,
+				degreeCode: course.degreeCode
+			}).sort({ coorte: -1 })
+		: [];
+
+	const allReviews = cohorts.flatMap((c) =>
+		c.reviews.map((r) => ({
+			...r.toObject({ flattenMaps: true, flattenObjectIds: true }),
+			cohort: new Date(r.createdAt).getFullYear().toString()
+		}))
+	);
+
 	if (!course) {
 		error(404, 'Course not found');
 	}
@@ -100,6 +115,8 @@ export const load: LayoutServerLoad = async ({ params }) => {
 				workload: await child.getWorkloads(),
 				grades: await child.getGrades()
 			}))
-		)
+		),
+		cohorts: cohorts.map((c) => ({ id: c.id, coorte: c.coorte, slug: c.getSlug() })),
+		allReviews
 	};
 };

@@ -11,7 +11,8 @@
 		workload,
 		grade,
 		sourced,
-		anonymousVerified
+		anonymousVerified,
+		cohort
 	}: {
 		author?: string;
 		authorId?: string;
@@ -22,6 +23,7 @@
 		grade?: number;
 		sourced?: boolean;
 		anonymousVerified?: boolean;
+		cohort?: string | number;
 	} = $props();
 </script>
 
@@ -53,6 +55,9 @@
 					hour: 'numeric',
 					minute: '2-digit'
 				})}
+				{#if cohort}
+					<span class="mx-1">&bullet;</span> coorte {cohort}
+				{/if}
 			</p>
 			<p class="text-sm text-zinc-300/75">
 				{text}
