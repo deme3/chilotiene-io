@@ -24,6 +24,7 @@ export interface IReview {
 	grade?: Grade;
 	imported: boolean;
 	createdAt: Date;
+	importerSourceId?: string;
 }
 
 export interface ICommonCourseData {
@@ -370,7 +371,8 @@ const CourseSchema = new Schema<ICourseDoc, ICourseModel, ICourseMethods>(
 						required: false
 					},
 					imported: { type: Boolean, required: true },
-					createdAt: { type: Date, required: true, default: Date.now }
+					createdAt: { type: Date, required: true, default: Date.now },
+					importerSourceId: { type: String, required: false }
 				})
 			],
 			required: true,
@@ -678,6 +680,7 @@ CourseSchema.static('importFrom', async function (obj: CourseData): Promise<
 CourseSchema.static(
 	'importReviewFromAggregator',
 	async function (entry: ImportedReviewerCourseEntry): Promise<void> {
+		const AGGREGATOR = 'AGGREGATOR';
 		const course = await this.findOne({
 			librettoCode: entry.exam.examCodePk.split('-')[0]
 		});
@@ -699,41 +702,60 @@ CourseSchema.static(
 			ratingsWithText[review.ratingValue]++;
 		}
 
-		// Each of "votedX" is the total number of votes for that rating both with
-		// and without a review entry in .reviews. So we need to subtract the number
-		// of votes with text from the total number of votes.
+		// Count the reviews without text already present in the database
+		const alreadyPresentReviews = course.reviews.filter(
+			(r) => r.importerSourceId && r.importerSourceId?.startsWith(`${AGGREGATOR}_NOTEXT_`)
+		);
+		const byRatingAlreadyPresent = alreadyPresentReviews.reduce(
+			(acc, r) => {
+				if (r.quality === 0) return acc;
+				acc[r.quality as FractionalRating]++;
+				return acc;
+			},
+			{ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } as Record<FractionalRating, number>
+		);
+
 		const ratingsWithoutText = { ...ratingsWithText };
-		ratingsWithoutText[1] = entry.ratingSummary.voted1 - ratingsWithText[1];
-		ratingsWithoutText[2] = entry.ratingSummary.voted2 - ratingsWithText[2];
-		ratingsWithoutText[3] = entry.ratingSummary.voted3 - ratingsWithText[3];
-		ratingsWithoutText[4] = entry.ratingSummary.voted4 - ratingsWithText[4];
-		ratingsWithoutText[5] = entry.ratingSummary.voted5 - ratingsWithText[5];
+		ratingsWithoutText[1] =
+			entry.ratingSummary.voted1 - ratingsWithText[1] - byRatingAlreadyPresent[1];
+		ratingsWithoutText[2] =
+			entry.ratingSummary.voted2 - ratingsWithText[2] - byRatingAlreadyPresent[2];
+		ratingsWithoutText[3] =
+			entry.ratingSummary.voted3 - ratingsWithText[3] - byRatingAlreadyPresent[3];
+		ratingsWithoutText[4] =
+			entry.ratingSummary.voted4 - ratingsWithText[4] - byRatingAlreadyPresent[4];
+		ratingsWithoutText[5] =
+			entry.ratingSummary.voted5 - ratingsWithText[5] - byRatingAlreadyPresent[5];
 
 		for (const [rating, count] of Object.entries(ratingsWithoutText)) {
 			for (let i = 0; i < count; i++) {
+				const importerSourceId = `${AGGREGATOR}_NOTEXT_${rating}_${i}`;
+				if (course.reviews.some((r) => r.importerSourceId === importerSourceId)) continue;
 				course.reviews.push({
-					course: course._id,
-					quality: rating,
+					quality: Number(rating),
 					workload: 0,
 					anonymous: true,
 					anonymousVerified: false,
 					imported: true,
-					text: 'This review has been imported from a source that did not provide a text.'
+					text: 'This review has been imported from a source that did not provide a text.',
+					importerSourceId
 				});
 			}
 		}
 
 		for (const review of entry.reviews) {
 			if (review.reviewText) {
+				const importerSourceId = `${AGGREGATOR}_REVIEW_${review.ratingId}`;
+				if (course.reviews.some((r) => r.importerSourceId === importerSourceId)) continue;
 				course.reviews.push({
-					course: course._id,
 					quality: review.ratingValue,
 					workload: 0,
 					anonymous: false,
 					anonymousVerified: false,
 					imported: true,
 					text: review.reviewText,
-					createdAt: new Date(review.ratingDate)
+					createdAt: new Date(review.ratingDate),
+					importerSourceId
 				});
 			}
 		}
