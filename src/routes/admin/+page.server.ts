@@ -171,6 +171,7 @@ export const actions = {
 			}
 
 			for (const entry of batch.exams) {
+				console.log(`Importing review for ${entry.exam.examCodePk}`);
 				await Course.importReviewFromAggregator(entry);
 			}
 			return { success: true, action: url.search };
