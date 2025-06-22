@@ -37,7 +37,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
 					]
 				}
 			},
-			{ $sort: { coorte: -1 } },
+			{ $sort: { coorte: -1, lastUpdated: -1 } },
 			{ $group: { _id: '$librettoCode', latestEntry: { $first: '$$ROOT' } } },
 			{ $replaceRoot: { newRoot: '$latestEntry' } },
 			{ $limit: 1 },

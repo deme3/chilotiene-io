@@ -113,7 +113,7 @@ export const load: PageServerLoad = async ({ url }) => {
 		// but we only need the latest offering of the course for listing purposes.
 		// When showing in detail, instead, we can merge information from all
 		// offerings.
-		{ $sort: { coorte: -1 } },
+		{ $sort: { coorte: -1, lastUpdated: -1 } },
 		{ $group: { _id: '$librettoCode', latestEntry: { $first: '$$ROOT' } } },
 		{ $replaceRoot: { newRoot: '$latestEntry' } },
 		{
