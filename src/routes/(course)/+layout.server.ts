@@ -59,9 +59,7 @@ export const load: LayoutServerLoad = async ({ params }) => {
 
 	const cohorts = course
 		? await Course.find({
-				librettoCode: course.librettoCode,
-				degreeTrackCode: course.degreeTrackCode,
-				degreeCode: course.degreeCode
+				librettoCode: course.librettoCode
 			}).sort({ coorte: -1 })
 		: [];
 
