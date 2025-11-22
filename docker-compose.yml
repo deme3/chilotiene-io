@@ -4,6 +4,8 @@ services:
     image: mongo
     restart: always
     environment:
+      # this is momentarily fine as mongo is not exposed to internet
+      # FIXME: this should be passed via env maybe?
       MONGO_INITDB_ROOT_USERNAME: chilotiene
       MONGO_INITDB_ROOT_PASSWORD: chilotiene
     expose:
