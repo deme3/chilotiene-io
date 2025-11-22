@@ -1,18 +1,26 @@
-# sv
+<img align="right" src="https://deme3.me/assets/img/chilotiene.png" width="60%" />
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+# chilotiene.io
+ 
+Side project website, showing reviews for courses at University of Trento. Currently deployed at [chilotiene.io](chilotiene.io).
 
-## Creating a project
+Development is currently stopped, but the website is functioning and serves as a MVP.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Technologies
 
-```bash
-# create a new project in the current directory
-npx sv create
+- **TypeScript**
+- **Database**: MongoDB
+- **Frontend**
+  - Svelte + SvelteKit
+  - TailwindCSS
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Info & why
+
+The platform is built using SvelteKit. It allows students to share their experiences and opinions on various courses, helping others make informed decisions about their studies.
+
+There are some existing review platforms, but they tend to gatekeep information, limiting access to enrolled students, hiding details behind logins or asking for personal information. I just built what I needed: an open information website where course reviews are freely accessible to anyone, with authenticated functions being completely optional and without any drawbacks for simple guests. The idea was inspired mostly by EPFL CourseFinder, but in general it was mostly an excuse to build something useful for myself and my fellow colleagues.
+
+I also took the opportunity to experiment with some modern web technologies. The site is built with Svelte, and I explored cross-page transitions using the latest CSS and JavaScript APIs now supported in browsers. It was both a practical and enjoyable way to dive into new frontend tools while solving a real problem.
 
 ## Developing
 
@@ -34,5 +42,3 @@ npm run build
 ```
 
 You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
