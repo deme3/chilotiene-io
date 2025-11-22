@@ -32,6 +32,12 @@ There are some existing review platforms, but they tend to gatekeep information,
 
 I also took the opportunity to experiment with some modern web technologies. The site is built with Svelte, and I explored cross-page transitions using the latest CSS and JavaScript APIs now supported in browsers. It was both a practical and enjoyable way to dive into new frontend tools while solving a real problem.
 
+## More screenshots
+
+![](https://deme3.me/assets/img/chilotiene-detail.png)
+<img src="https://deme3.me/assets/img/chilotiene-card-anim.webp" width="49%" />
+<img src="https://deme3.me/assets/img/chilotiene-crosspage-trans.webp" width="49%" />
+
 ## Developing
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
