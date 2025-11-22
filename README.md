@@ -6,9 +6,19 @@ Side project website, showing reviews for courses at University of Trento. Curre
 
 Development is currently stopped, but the website is functioning and serves as a MVP.
 
+## Core features
+
+- Search by teacher name OR course name OR course number
+- Filter by department
+- Give anonymous or non-anonymous reviews with difficulty rating, quality rating and final grade
+- Sign up with @studenti.unitn.it e-mail for giving "verified" reviews
+- **Automatic internationalization** depending on user locale
+  - (or language selector at bottom of the page)
+
 ## Technologies
 
 - **TypeScript**
+- **Resend** for sending sign-up confirmation e-mails
 - **Database**: MongoDB
 - **Frontend**
   - Svelte + SvelteKit
