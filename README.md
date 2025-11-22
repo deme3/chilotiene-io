@@ -2,7 +2,7 @@
 
 # chilotiene.io
  
-Side project website, showing reviews for courses at University of Trento. Currently deployed at [chilotiene.io](chilotiene.io).
+Side project website, showing reviews for courses at University of Trento. Currently deployed at [chilotiene.io](https://chilotiene.io).
 
 Development is currently stopped, but the website is functioning and serves as a MVP.
 
